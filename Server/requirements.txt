@@ -1,0 +1,10 @@
+Django>=4.2
+djangorestframework>=3.14
+djangorestframework-simplejwt>=5.2
+psycopg2-binary>=2.9
+django-environ>=0.9
+whitenoise>=6.5
+django-cors-headers>=4.0
+gunicorn>=20.1
+black==24.1.0
+ruff==0.5.1
