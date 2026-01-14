@@ -21,8 +21,15 @@ import { AuthProvider } from "./context/AuthContext";
 import { LoginPage } from "./pages/LoginPage";
 
 import { SignupPage } from "./pages/SignupPage";
+import { initGA } from "./utils/analytics";
+import { usePageTracking } from "./hooks/usePageTracking";
+
+// Initialize GA once
+initGA();
 
 function AppShell() {
+  usePageTracking();
+
   return (
     <div className="min-h-screen bg-surface flex flex-col font-sans">
       <Navigation />
