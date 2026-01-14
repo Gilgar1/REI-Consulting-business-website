@@ -10,7 +10,7 @@ export function HomePage() {
   return (
     <div className="flex flex-col">
       {/* Hero Section */}
-      <section className="relative min-h-[85vh] flex items-center justify-center overflow-hidden bg-primary">
+      <section className="relative min-h-[85vh] flex items-center justify-center overflow-hidden bg-primary px-4">
         {/* Background Overlay */}
         <div className="absolute inset-0 z-0">
           <div className="absolute inset-0 bg-gradient-to-r from-primary/95 to-primary/80 z-10" />
@@ -22,45 +22,45 @@ export function HomePage() {
         </div>
 
         {/* Content */}
-        <div className="relative z-20 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center text-white space-y-8">
+        <div className="relative z-20 max-w-7xl mx-auto text-center text-white space-y-8 w-full">
           <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/10 backdrop-blur-md border border-white/20 text-accent font-semibold text-sm animate-fade-in-up">
             <span className="w-2 h-2 rounded-full bg-accent animate-pulse" />
             Leading Real Estate Consultancy in Cameroon
           </div>
 
-          <h1 className="font-heading font-bold text-5xl md:text-7xl leading-tight max-w-4xl mx-auto text-white">
+          <h1 className="font-heading font-bold text-4xl md:text-6xl lg:text-7xl leading-tight max-w-4xl mx-auto text-white">
             Secure Your Future in <br />
             <span className="text-transparent bg-clip-text bg-gradient-to-r from-accent to-amber-300">
               African Real Estate
             </span>
           </h1>
 
-          <p className="text-lg md:text-xl text-slate-300 max-w-2xl mx-auto leading-relaxed">
+          <p className="text-base md:text-xl text-slate-300 max-w-2xl mx-auto leading-relaxed">
             We guide diaspora investors and local businesses through complex property acquisitions, loan financing, and due diligence with 100% transparency.
           </p>
 
-          <div className="flex flex-col sm:flex-row items-center justify-center gap-4 pt-4">
+          <div className="flex flex-col sm:flex-row items-center justify-center gap-4 pt-4 px-4 sm:px-0">
             <Link
               to="/contact"
-              className="px-8 py-4 bg-accent hover:bg-accent/90 text-white font-bold rounded-full transition-all duration-300 shadow-lg shadow-accent/25 hover:-translate-y-1 flex items-center gap-2"
+              className="w-full sm:w-auto justify-center px-8 py-4 bg-accent hover:bg-accent/90 text-white font-bold rounded-full transition-all duration-300 shadow-lg shadow-accent/25 hover:-translate-y-1 flex items-center gap-2"
             >
               Book Free Consultation
               <ArrowRight className="w-5 h-5" />
             </Link>
             <Link
               to="/listings"
-              className="px-8 py-4 bg-white/10 hover:bg-white/20 backdrop-blur-md border border-white/20 text-white font-bold rounded-full transition-all duration-300 flex items-center gap-2"
+              className="w-full sm:w-auto justify-center px-8 py-4 bg-white/10 hover:bg-white/20 backdrop-blur-md border border-white/20 text-white font-bold rounded-full transition-all duration-300 flex items-center gap-2"
             >
               View Properties
             </Link>
           </div>
 
           {/* Trust Ticker */}
-          <div className="pt-16 opacity-70">
+          <div className="pt-12 md:pt-16 opacity-70">
             <p className="text-sm font-medium tracking-widest text-slate-400 mb-6 uppercase">Trusted By Partners In</p>
-            <div className="flex justify-center gap-12 grayscale opacity-60 flex-wrap">
+            <div className="flex justify-center gap-8 md:gap-12 grayscale opacity-60 flex-wrap">
               {FEATURED_CITIES.map((city) => (
-                <span key={city} className="font-heading font-bold text-xl">{city}</span>
+                <span key={city} className="font-heading font-bold text-lg md:text-xl">{city}</span>
               ))}
             </div>
           </div>
@@ -68,9 +68,9 @@ export function HomePage() {
       </section>
 
       {/* Services Preview (Floating Cards) */}
-      <section className="py-24 bg-surface -mt-20 relative z-30">
+      <section className="py-16 md:py-24 bg-surface -mt-20 relative z-30">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 md:gap-8">
             {[
               {
                 icon: Shield,
@@ -101,7 +101,7 @@ export function HomePage() {
       </section>
 
       {/* Featured Properties Section - Dynamic Data */}
-      <section className="py-24 bg-surface/50">
+      <section className="py-16 md:py-24 bg-surface/50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16">
             <h2 className="text-4xl font-heading font-bold text-primary mb-4">Featured Opportunities</h2>

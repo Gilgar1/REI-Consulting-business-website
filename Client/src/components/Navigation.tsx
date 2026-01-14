@@ -27,7 +27,7 @@ export function Navigation() {
   return (
     <nav className="fixed w-full z-50 transition-all duration-300 backdrop-blur-md bg-white/95 border-b border-white/20 shadow-sm">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex justify-between items-center h-24">
+        <div className="flex justify-between items-center h-20 md:h-24">
 
           {/* Logo */}
           <Link
@@ -35,7 +35,7 @@ export function Navigation() {
             className="flex items-center gap-3 group"
             onClick={() => setIsOpen(false)}
           >
-            <img src={logo} alt="REI Consulting" className="h-16 w-auto object-contain" />
+            <img src={logo} alt="REI Consulting" className="h-12 md:h-16 w-auto object-contain" />
           </Link>
 
           {/* Desktop Navigation */}
@@ -109,13 +109,13 @@ export function Navigation() {
 
       {/* Mobile Menu Drawer */}
       <div
-        className={`fixed top-0 right-0 z-50 w-64 h-full bg-white shadow-2xl transform transition-transform duration-300 ease-out md:hidden ${isOpen ? 'translate-x-0' : 'translate-x-full'
+        className={`fixed top-0 right-0 z-50 w-64 h-full bg-primary shadow-2xl transform transition-transform duration-300 ease-out md:hidden ${isOpen ? 'translate-x-0' : 'translate-x-full'
           }`}
       >
         <div className="p-6 flex flex-col h-full">
           <div className="flex justify-between items-center mb-8">
-            <span className="font-heading font-bold text-lg text-primary">Menu</span>
-            <button onClick={() => setIsOpen(false)} className="p-2 text-slate-400 hover:text-slate-600">
+            <span className="font-heading font-bold text-lg text-white">Menu</span>
+            <button onClick={() => setIsOpen(false)} className="p-2 text-white/70 hover:text-white transition-colors">
               <X className="h-5 w-5" />
             </button>
           </div>
@@ -126,7 +126,7 @@ export function Navigation() {
                 key={link.path}
                 to={link.path}
                 onClick={() => setIsOpen(false)}
-                className={`text-lg font-medium transition-colors ${isActive(link.path) ? 'text-accent' : 'text-slate-600'
+                className={`text-lg font-medium transition-colors ${isActive(link.path) ? 'text-accent' : 'text-slate-300 hover:text-white'
                   }`}
               >
                 {link.name}
@@ -139,7 +139,7 @@ export function Navigation() {
                   logout();
                   setIsOpen(false);
                 }}
-                className="text-lg font-medium text-slate-600 text-left flex items-center gap-2"
+                className="text-lg font-medium text-slate-300 hover:text-white text-left flex items-center gap-2 transition-colors"
               >
                 <LogOut className="w-5 h-5" />
                 Logout
@@ -148,7 +148,7 @@ export function Navigation() {
               <Link
                 to="/login"
                 onClick={() => setIsOpen(false)}
-                className="text-lg font-medium text-slate-600 flex items-center gap-2"
+                className="text-lg font-medium text-slate-300 hover:text-white flex items-center gap-2 transition-colors"
               >
                 <User className="w-5 h-5" />
                 Login
