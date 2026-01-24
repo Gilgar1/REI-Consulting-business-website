@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useAuth } from '../hooks/useAuth';
-import api from '../api';
+
+import { supabase } from '../supabaseClient';
 import { Lock, Mail, Loader2, ArrowRight } from 'lucide-react';
 
 export function LoginPage() {
@@ -9,7 +9,7 @@ export function LoginPage() {
     const [password, setPassword] = useState('');
     const [error, setError] = useState('');
     const [loading, setLoading] = useState(false);
-    const { login } = useAuth();
+    // const { login } = useAuth(); // Auth is now automatic via Supabase listener
     const navigate = useNavigate();
 
     const handleSubmit = async (e: React.FormEvent) => {
@@ -18,19 +18,19 @@ export function LoginPage() {
         setLoading(true);
 
         try {
-            // Adjusted to standard simplejwt endpoint expectation. 
-            // Often strictly 'username', 'password'.
-            const response = await api.post('/api/token/', {
-                username: email,
+            const { error } = await supabase.auth.signInWithPassword({
+                email: email,
                 password: password,
             });
 
-            const { access, refresh } = response.data;
-            login(access, refresh);
+            if (error) throw error;
+            // Auth state change is handled by AuthContext listener, 
+            // but we can explicitly navigate or let the effect handle it.
+            // For better UX, we'll navigate here if successful.
             navigate('/');
         } catch (err: any) {
             console.error(err);
-            setError('Invalid credentials. Please try again.');
+            setError(err.message || 'Invalid credentials. Please try again.');
         } finally {
             setLoading(false);
         }

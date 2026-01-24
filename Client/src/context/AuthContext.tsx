@@ -1,43 +1,42 @@
 import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
-import api from '../api';
+import { supabase } from '../supabaseClient';
+import { Session } from '@supabase/supabase-js';
 
 interface AuthContextType {
     isAuthenticated: boolean;
-    login: (accessToken: string, refreshToken: string) => void;
-    logout: () => void;
-    checkAuthStatus: () => boolean;
+    session: Session | null;
+    logout: () => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export function AuthProvider({ children }: { children: ReactNode }) {
-    const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false);
+    const [session, setSession] = useState<Session | null>(null);
 
     useEffect(() => {
-        checkAuthStatus();
+        // Check active session
+        supabase.auth.getSession().then(({ data: { session } }) => {
+            setSession(session);
+        });
+
+        // Listen for changes
+        const {
+            data: { subscription },
+        } = supabase.auth.onAuthStateChange((_event, session) => {
+            setSession(session);
+        });
+
+        return () => subscription.unsubscribe();
     }, []);
 
-    const checkAuthStatus = () => {
-        const token = localStorage.getItem('access_token');
-        const isValid = !!token; // Minimal check for existence
-        setIsAuthenticated(isValid);
-        return isValid;
+    const logout = async () => {
+        await supabase.auth.signOut();
     };
 
-    const login = (accessToken: string, refreshToken: string) => {
-        localStorage.setItem('access_token', accessToken);
-        localStorage.setItem('refresh_token', refreshToken);
-        setIsAuthenticated(true);
-    };
-
-    const logout = () => {
-        localStorage.removeItem('access_token');
-        localStorage.removeItem('refresh_token');
-        setIsAuthenticated(false);
-    };
+    const isAuthenticated = !!session;
 
     return (
-        <AuthContext.Provider value={{ isAuthenticated, login, logout, checkAuthStatus }}>
+        <AuthContext.Provider value={{ isAuthenticated, session, logout }}>
             {children}
         </AuthContext.Provider>
     );

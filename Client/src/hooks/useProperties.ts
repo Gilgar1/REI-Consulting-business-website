@@ -1,15 +1,19 @@
 import { useState, useEffect } from 'react';
-import api from '../api';
+import { supabase } from '../supabaseClient';
+import { PostgrestError } from '@supabase/supabase-js';
 
 export interface Property {
-    id: number;
+    id: number | string;
     title: string;
-    image_url: string;
+    image: string; // Component expects 'image'
     location: string;
     price: string;
-    features: string;
+    beds: number | null;
+    baths: number | null;
+    area: string;
+    description: string;
     verified: boolean;
-    created_at: string;
+    documents: string;
 }
 
 export function useProperties() {
@@ -20,12 +24,32 @@ export function useProperties() {
     useEffect(() => {
         const fetchProperties = async () => {
             try {
-                const response = await api.get('/api/properties/');
-                const data = Array.isArray(response.data) ? response.data : response.data.results || [];
-                setProperties(data);
-            } catch (err) {
+                const { data, error } = await supabase
+                    .from('properties')
+                    .select('*');
+
+                if (error) throw error;
+
+                // Map Supabase data to frontend expected shape
+                // Defaulting missing fields since schema might be simple
+                const mappedData: Property[] = (data || []).map((item: any) => ({
+                    id: item.id,
+                    title: item.title || 'Untitled Property',
+                    image: item.image_url || 'https://via.placeholder.com/400',
+                    location: item.location || 'Unknown Location',
+                    price: item.price || 'Contact for Price',
+                    beds: item.beds || null, // Assuming column added or null
+                    baths: item.baths || null,
+                    area: item.area || 'N/A',
+                    description: item.description || item.features || 'No description available.',
+                    verified: item.verified || false,
+                    documents: item.documents || 'Contact for details'
+                }));
+
+                setProperties(mappedData);
+            } catch (err: any) {
                 console.error('Failed to fetch properties:', err);
-                setError('Failed to load properties.');
+                setError(err.message || 'Failed to load properties.');
             } finally {
                 setLoading(false);
             }
