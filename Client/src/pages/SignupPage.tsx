@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-import { useAuth } from '../hooks/useAuth';
-import api from '../api';
+
+import { supabase } from '../supabaseClient';
 import { Lock, Mail, User, Loader2, ArrowRight } from 'lucide-react';
 
 export function SignupPage() {
@@ -10,7 +10,7 @@ export function SignupPage() {
     const [password, setPassword] = useState('');
     const [error, setError] = useState('');
     const [loading, setLoading] = useState(false);
-    const { login } = useAuth();
+    // const { login } = useAuth();
     const navigate = useNavigate();
 
     const handleSubmit = async (e: React.FormEvent) => {
@@ -19,35 +19,26 @@ export function SignupPage() {
         setLoading(true);
 
         try {
-            // 1. Register the user
-            await api.post('/api/register/', {
-                username,
-                email,
-                password,
+            const { error: signUpError } = await supabase.auth.signUp({
+                email: email,
+                password: password,
+                options: {
+                    data: {
+                        username: username,
+                    },
+                },
             });
 
-            // 2. Auto-login after successful registration
-            const loginResponse = await api.post('/api/token/', {
-                username,
-                password,
-            });
+            if (signUpError) throw signUpError;
 
-            const { access, refresh } = loginResponse.data;
-            login(access, refresh);
+            // Supabase Auth handles session automatically if email confirmation is disabled.
+            // If email confirmation is enabled, the user won't be logged in yet.
+            // For now, we assume immediate login or we can show a message.
+            // We'll redirect to home.
             navigate('/');
         } catch (err: any) {
             console.error(err);
-            if (err.response?.data) {
-                // Try to show specific validation errors
-                const entries = Object.entries(err.response.data);
-                if (entries.length > 0) {
-                    setError(`${entries[0][0]}: ${entries[0][1]}`);
-                } else {
-                    setError('Registration failed. Please try again.');
-                }
-            } else {
-                setError('Registration failed. Please checking your connection.');
-            }
+            setError(err.message || 'Registration failed. Please try again.');
         } finally {
             setLoading(false);
         }

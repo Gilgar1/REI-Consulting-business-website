@@ -16,7 +16,7 @@ export function PropertyCard({ property }: PropertyCardProps) {
         <div className="bg-white rounded-xl overflow-hidden border border-gray-200 hover:shadow-xl transition-shadow shadow-sm flex flex-col h-full">
             <div className="relative h-64">
                 <ImageWithFallback
-                    src={property.image_url}
+                    src={property.image}
                     alt={property.title}
                     className="w-full h-full object-cover"
                 />
@@ -39,7 +39,7 @@ export function PropertyCard({ property }: PropertyCardProps) {
                 <div className="text-accent font-bold text-2xl mb-4">{property.price}</div>
 
                 <p className="text-slate-600 text-sm mb-4 line-clamp-2 flex-grow">
-                    {property.features || "No description available."}
+                    {property.description || "No description available."}
                 </p>
 
                 <div className="mt-auto">

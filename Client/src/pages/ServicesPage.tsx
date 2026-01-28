@@ -1,5 +1,6 @@
 import { FileText, Building, ShieldCheck, Home, Globe, Users, ArrowRight } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import { ScrollReveal } from "../components/animations/ScrollReveal";
 
 const services = [
   {
@@ -66,24 +67,25 @@ export function ServicesPage() {
             {services.map((service, index) => {
               const Icon = service.icon;
               return (
-                <div
-                  key={index}
-                  className="p-8 bg-white rounded-2xl shadow-sm border border-slate-100 hover:border-accent hover:shadow-xl hover:-translate-y-1 transition-all duration-300 cursor-pointer group flex flex-col h-full"
-                  onClick={() => {
-                    navigate(service.path);
-                    window.scrollTo({ top: 0, behavior: 'smooth' });
-                  }}
-                >
-                  <div className="w-14 h-14 bg-primary/5 rounded-xl flex items-center justify-center mb-6 text-primary group-hover:bg-accent group-hover:text-white transition-colors">
-                    <Icon className="w-7 h-7" />
+                <ScrollReveal key={index} staggerIndex={index} className="h-full">
+                  <div
+                    className="p-8 bg-white rounded-2xl shadow-sm border border-slate-100 hover:border-accent hover:shadow-xl hover:-translate-y-1 hover:scale-[1.03] transition-all duration-300 cursor-pointer group flex flex-col h-full h-full"
+                    onClick={() => {
+                      navigate(service.path);
+                      window.scrollTo({ top: 0, behavior: 'smooth' });
+                    }}
+                  >
+                    <div className="w-14 h-14 bg-primary/5 rounded-xl flex items-center justify-center mb-6 text-primary group-hover:bg-accent group-hover:text-white transition-colors">
+                      <Icon className="w-7 h-7" />
+                    </div>
+                    <h3 className="text-xl font-bold text-primary mb-3 group-hover:text-accent transition-colors">{service.title}</h3>
+                    <p className="text-slate-600 mb-8 leading-relaxed flex-grow">{service.description}</p>
+                    <div className="flex items-center gap-2 text-accent font-semibold text-sm group-hover:gap-3 transition-all">
+                      <span>Explore Service</span>
+                      <ArrowRight className="w-4 h-4" />
+                    </div>
                   </div>
-                  <h3 className="text-xl font-bold text-primary mb-3 group-hover:text-accent transition-colors">{service.title}</h3>
-                  <p className="text-slate-600 mb-8 leading-relaxed flex-grow">{service.description}</p>
-                  <div className="flex items-center gap-2 text-accent font-semibold text-sm group-hover:gap-3 transition-all">
-                    <span>Explore Service</span>
-                    <ArrowRight className="w-4 h-4" />
-                  </div>
-                </div>
+                </ScrollReveal>
               );
             })}
           </div>
