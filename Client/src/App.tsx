@@ -23,6 +23,7 @@ import { LoginPage } from "./pages/LoginPage";
 import { SignupPage } from "./pages/SignupPage";
 import { initGA } from "./utils/analytics";
 import { usePageTracking } from "./hooks/usePageTracking";
+import { LanguageProvider } from "./i18n/LanguageContext";
 
 // Initialize GA once
 initGA();
@@ -61,9 +62,11 @@ function AppShell() {
 export default function App() {
   return (
     <AuthProvider>
-      <BrowserRouter>
-        <AppShell />
-      </BrowserRouter>
+      <LanguageProvider>
+        <BrowserRouter>
+          <AppShell />
+        </BrowserRouter>
+      </LanguageProvider>
     </AuthProvider>
   );
 }
