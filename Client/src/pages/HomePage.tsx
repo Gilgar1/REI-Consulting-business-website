@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import { useProperties } from "../hooks/useProperties";
 import { FEATURED_CITIES } from "../utils/constants";
 import { PropertyCard } from "../components/PropertyCard";
+import { ScrollReveal } from "../components/animations/ScrollReveal";
 
 export function HomePage() {
   const { properties, loading, error } = useProperties();
@@ -71,7 +72,7 @@ export function HomePage() {
       <section className="py-16 md:py-24 bg-surface -mt-20 relative z-30">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6 md:gap-8">
-            {[
+            {([
               {
                 icon: Shield,
                 title: "Due Diligence",
@@ -87,14 +88,16 @@ export function HomePage() {
                 title: "Loan Assistance",
                 desc: "Expert navigation of Crédit Foncier du Cameroun (CFC) for property funding."
               }
-            ].map((service, i) => (
-              <div key={i} className="bg-white p-8 rounded-2xl shadow-xl shadow-slate-200/50 border border-slate-100 hover:-translate-y-2 transition-all duration-300 group">
-                <div className="w-14 h-14 bg-primary/5 rounded-xl flex items-center justify-center mb-6 group-hover:bg-accent group-hover:text-white transition-colors duration-300 text-primary">
-                  <service.icon className="w-7 h-7" />
+            ]).map((service, i) => (
+              <ScrollReveal key={i} staggerIndex={i} className="h-full">
+                <div className="bg-white p-8 rounded-2xl shadow-xl shadow-slate-200/50 border border-slate-100 hover:-translate-y-2 hover:scale-[1.03] transition-all duration-300 group h-full">
+                  <div className="w-14 h-14 bg-primary/5 rounded-xl flex items-center justify-center mb-6 group-hover:bg-accent group-hover:text-white transition-colors duration-300 text-primary">
+                    <service.icon className="w-7 h-7" />
+                  </div>
+                  <h3 className="text-2xl font-bold mb-3 text-primary">{service.title}</h3>
+                  <p className="text-slate-600 leading-relaxed">{service.desc}</p>
                 </div>
-                <h3 className="text-2xl font-bold mb-3 text-primary">{service.title}</h3>
-                <p className="text-slate-600 leading-relaxed">{service.desc}</p>
-              </div>
+              </ScrollReveal>
             ))}
           </div>
         </div>
@@ -116,8 +119,10 @@ export function HomePage() {
             <div className="text-center text-red-500 py-12">{error}</div>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-              {properties.slice(0, 3).map((property) => (
-                <PropertyCard key={property.id} property={property} />
+              {properties.slice(0, 3).map((property, index) => (
+                <ScrollReveal key={property.id} staggerIndex={index} className="h-full">
+                  <PropertyCard property={property} />
+                </ScrollReveal>
               ))}
               {properties.length === 0 && (
                 <div className="col-span-full text-center py-12 bg-white rounded-xl border border-dashed border-slate-300">

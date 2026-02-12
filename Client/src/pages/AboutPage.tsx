@@ -1,5 +1,7 @@
 import { Target, Eye, Award, User, Lightbulb, CheckCircle2, ArrowRight } from "lucide-react";
 import { Link } from "react-router-dom";
+import architectImg from "../assets/architect.jpg";
+import { ScrollReveal } from "../components/animations/ScrollReveal";
 
 const values = [
   {
@@ -86,18 +88,17 @@ export function AboutPage() {
             {/* Image Side */}
             <div className="w-full lg:w-5/12 relative">
               <div className="absolute inset-0 bg-accent/20 rounded-3xl transform rotate-6 translate-x-4 translate-y-4" />
-              <div className="relative bg-primary rounded-3xl overflow-hidden shadow-2xl aspect-[4/5] flex items-center justify-center text-white p-10 text-center">
-                {/* Placeholder for Founder Image */}
-                <div className="space-y-6">
-                  <div className="w-32 h-32 bg-white/20 rounded-full mx-auto flex items-center justify-center">
-                    <User className="w-16 h-16" />
-                  </div>
-                  <div>
-                    <h4 className="font-heading font-bold text-2xl">Ndah Gilgar M.</h4>
-                    <p className="text-accent font-medium">Founder & Lead Strategist</p>
-                  </div>
-                  <div className="h-px w-16 bg-white/20 mx-auto" />
-                  <p className="text-sm text-slate-300 italic">"I built this firm to give investors the safety I wished I had when I started."</p>
+              <div className="relative bg-primary rounded-3xl overflow-hidden shadow-2xl aspect-[4/5] group">
+                <img
+                  src={architectImg}
+                  alt="Ndah Gilgar M."
+                  className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-transparent" />
+                <div className="absolute inset-0 flex flex-col justify-end items-center text-white text-center p-6 pb-2">
+                  <h4 className="font-heading font-bold text-2xl mb-1 text-accent">Ndah Gilgar M.</h4>
+                  <p className="text-accent font-medium text-sm tracking-wide uppercase mb-4">Founder & Lead Strategist</p>
+                  <p className="text-sm text-slate-200 italic opacity-90">"I built this firm to give investors the safety I wished I had when I started."</p>
                 </div>
               </div>
             </div>
@@ -154,13 +155,15 @@ export function AboutPage() {
             {values.map((value, index) => {
               const Icon = value.icon;
               return (
-                <div key={index} className="bg-white p-8 rounded-2xl shadow-sm border border-slate-100 hover:shadow-lg transition-all duration-300">
-                  <div className="w-12 h-12 bg-primary/5 rounded-xl flex items-center justify-center mb-6 text-primary">
-                    <Icon className="w-6 h-6" />
+                <ScrollReveal key={index} staggerIndex={index} className="h-full">
+                  <div className="bg-white p-8 rounded-2xl shadow-sm border border-slate-100 hover:shadow-lg hover:scale-[1.03] transition-all duration-300 h-full">
+                    <div className="w-12 h-12 bg-primary/5 rounded-xl flex items-center justify-center mb-6 text-primary">
+                      <Icon className="w-6 h-6" />
+                    </div>
+                    <h3 className="text-xl font-bold text-primary mb-3">{value.title}</h3>
+                    <p className="text-slate-600 leading-relaxed">{value.description}</p>
                   </div>
-                  <h3 className="text-xl font-bold text-primary mb-3">{value.title}</h3>
-                  <p className="text-slate-600 leading-relaxed">{value.description}</p>
-                </div>
+                </ScrollReveal>
               );
             })}
           </div>
