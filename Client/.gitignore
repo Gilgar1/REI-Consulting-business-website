@@ -49,7 +49,16 @@ env/
 
 # Environment Variables (Keep templates, ignore actuals)
 .env
+.env.local
+.env.*
 Client/.env
+Client/.env.local
+Client/.env.*
+!Client/.env.example
+Client/Client/.env
+Client/Client/.env.local
+Client/Client/.env.*
+!Client/Client/.env.example
 Server/.env
 Server/db.sqlite3
 

@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Menu, X, Phone, User, LogOut, ChevronDown } from 'lucide-react';
+import { Menu, X, Phone, User, LogOut, ChevronDown, ShieldCheck, UserPlus } from 'lucide-react';
 import { Link, useLocation } from 'react-router-dom';
 import { useAuth } from '../hooks/useAuth';
 import { useLanguage } from '../i18n/LanguageContext'; // Custom hook
@@ -18,8 +18,9 @@ export function Navigation() {
     { name: t.nav.about, path: '/about' },
     { name: t.nav.services, path: '/services' },
     { name: t.nav.listings, path: '/listings' },
+    { name: t.nav.simulator, path: '/simulator' },
+    { name: t.nav.eligibility, path: '/eligibility' },
     { name: t.nav.blog, path: '/blog' },
-    { name: t.nav.contact, path: '/contact' },
   ];
 
   const isActive = (path: string) => {
@@ -92,18 +93,27 @@ export function Navigation() {
             <div className="h-6 w-px bg-slate-200 mx-2"></div>
 
             {isAuthenticated ? (
-              <button
-                onClick={logout}
-                className="text-slate-600 hover:text-primary text-sm font-medium flex items-center gap-2"
-              >
-                <LogOut className="w-4 h-4" />
-                {t.nav.logout}
-              </button>
+              <div className="flex items-center gap-3">
+                <Link
+                  to="/admin"
+                  className="px-3.5 py-1.5 rounded-full bg-amber-500/10 text-accent hover:bg-amber-500/20 text-xs font-bold uppercase tracking-wider flex items-center gap-1.5 transition-colors border border-amber-500/30"
+                >
+                  <ShieldCheck className="w-3.5 h-3.5" />
+                  Admin
+                </Link>
+                <button
+                  onClick={logout}
+                  className="text-slate-600 hover:text-primary text-sm font-medium flex items-center gap-2"
+                >
+                  <LogOut className="w-4 h-4" />
+                  {t.nav.logout}
+                </button>
+              </div>
             ) : (
               <div className="flex items-center gap-4">
                 <Link
                   to="/login"
-                  className="text-slate-600 hover:text-primary text-sm font-medium flex items-center gap-2"
+                  className="text-slate-600 hover:text-primary text-sm font-semibold flex items-center gap-2"
                 >
                   <User className="w-4 h-4" />
                   {t.nav.login}
@@ -112,13 +122,13 @@ export function Navigation() {
                   to="/signup"
                   className="px-5 py-2 border border-primary/20 text-primary text-sm font-semibold rounded-full hover:bg-primary/5 transition-all duration-300"
                 >
-                  {t.nav.signup}
+                  {t.nav.register}
                 </Link>
               </div>
             )}
 
             <Link
-              to="/contact"
+              to="/book"
               className="px-6 py-2.5 bg-primary text-white text-sm font-semibold rounded-full hover:bg-accent hover:shadow-lg hover:shadow-accent/20 transition-all duration-300 transform hover:-translate-y-0.5 flex items-center gap-2"
             >
               <Phone className="w-4 h-4" />
@@ -198,32 +208,52 @@ export function Navigation() {
             ))}
 
             {isAuthenticated ? (
-              <button
-                onClick={() => {
-                  logout();
-                  setIsOpen(false);
-                }}
-                className="text-lg font-medium text-slate-300 hover:text-white text-left flex items-center gap-2 transition-colors"
-              >
-                <LogOut className="w-5 h-5" />
-                {t.nav.logout}
-              </button>
+              <>
+                <Link
+                  to="/admin"
+                  onClick={() => setIsOpen(false)}
+                  className="text-lg font-semibold text-amber-400 hover:text-amber-300 text-left flex items-center gap-2 transition-colors"
+                >
+                  <ShieldCheck className="w-5 h-5" />
+                  Admin Dashboard
+                </Link>
+                <button
+                  onClick={() => {
+                    logout();
+                    setIsOpen(false);
+                  }}
+                  className="text-lg font-medium text-slate-300 hover:text-white text-left flex items-center gap-2 transition-colors"
+                >
+                  <LogOut className="w-5 h-5" />
+                  {t.nav.logout}
+                </button>
+              </>
             ) : (
-              <Link
-                to="/login"
-                onClick={() => setIsOpen(false)}
-                className="text-lg font-medium text-slate-300 hover:text-white flex items-center gap-2 transition-colors"
-              >
-                <User className="w-5 h-5" />
-                {t.nav.login}
-              </Link>
+              <div className="flex flex-col gap-2 pt-2 border-t border-white/10">
+                <Link
+                  to="/login"
+                  onClick={() => setIsOpen(false)}
+                  className="text-lg font-semibold text-slate-300 hover:text-white flex items-center gap-2 transition-colors py-1"
+                >
+                  <User className="w-5 h-5" />
+                  {t.nav.login}
+                </Link>
+                <Link
+                  to="/signup"
+                  onClick={() => setIsOpen(false)}
+                  className="text-lg font-semibold text-accent hover:text-accent/80 flex items-center gap-2 transition-colors py-1"
+                >
+                  <UserPlus className="w-5 h-5" />
+                  {t.nav.register}
+                </Link>
+              </div>
             )}
 
           </div>
 
           <div className="mt-auto">
             <Link
-              to="/contact"
+              to="/book"
               onClick={() => setIsOpen(false)}
               className="w-full justify-center flex items-center gap-2 px-6 py-3 bg-primary text-white rounded-lg hover:bg-primary/90 transition-colors"
             >

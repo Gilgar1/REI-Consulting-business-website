@@ -92,7 +92,6 @@ export function Footer() {
             <Link to="#" className="hover:text-white transition-colors">Privacy Policy</Link>
             <Link to="#" className="hover:text-white transition-colors">Terms of Service</Link>
             <Link to="#" className="hover:text-white transition-colors">Cookie Policy</Link>
-            <a href="http://localhost:8000/admin" target="_blank" rel="noopener noreferrer" className="hover:text-white transition-colors text-slate-700 hover:text-slate-500">Admin Login</a>
           </div>
         </div>
       </div>

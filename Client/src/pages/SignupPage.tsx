@@ -140,7 +140,7 @@ export function SignupPage() {
                                 <Loader2 className="w-5 h-5 animate-spin" />
                             ) : (
                                 <span className="flex items-center gap-2">
-                                    Sign up
+                                    Register
                                     <ArrowRight className="w-4 h-4" />
                                 </span>
                             )}

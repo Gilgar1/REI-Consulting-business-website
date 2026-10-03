@@ -5,10 +5,12 @@ export const fr = {
         about: "À Propos",
         services: "Services",
         listings: "Annonces",
+        simulator: "Simulateur",
+        eligibility: "Éligibilité",
         blog: "Blog",
-        contact: "Contact",
         login: "Connexion",
         signup: "S'inscrire",
+        register: "S'inscrire",
         logout: "Déconnexion",
         book: "Consultation"
     },
