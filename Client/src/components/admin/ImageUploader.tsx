@@ -5,7 +5,9 @@ import { Button } from '../ui/button';
 
 interface ImageUploaderProps {
   value?: string;
-  onChange: (url: string) => void;
+  currentUrl?: string | null;
+  onChange?: (url: string) => void;
+  onUploaded?: (url: string) => void;
   table: string; // e.g., 'properties' | 'articles'
   label?: string;
   disabled?: boolean;
@@ -13,11 +15,18 @@ interface ImageUploaderProps {
 
 export function ImageUploader({
   value,
+  currentUrl,
   onChange,
+  onUploaded,
   table,
   label = 'Featured Image / Photo',
   disabled = false,
 }: ImageUploaderProps) {
+  const currentValue = currentUrl !== undefined ? (currentUrl || '') : (value || '');
+  const triggerChange = (url: string) => {
+    onChange?.(url);
+    onUploaded?.(url);
+  };
   const [isDragging, setIsDragging] = useState(false);
   const [uploading, setUploading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -63,7 +72,7 @@ export function ImageUploader({
         .getPublicUrl(data.path);
 
       if (urlData?.publicUrl) {
-        onChange(urlData.publicUrl);
+        triggerChange(urlData.publicUrl);
       } else {
         throw new Error('Could not retrieve public URL for uploaded file.');
       }
@@ -123,27 +132,27 @@ export function ImageUploader({
         <div className="flex gap-2">
           <input
             type="url"
-            value={value || ''}
-            onChange={(e) => onChange(e.target.value)}
+            value={currentValue}
+            onChange={(e) => triggerChange(e.target.value)}
             placeholder="https://images.unsplash.com/..."
             className="flex-1 px-3 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-accent"
           />
-          {value && (
+          {currentValue && (
             <Button
               type="button"
               variant="outline"
               size="sm"
-              onClick={() => onChange('')}
+              onClick={() => triggerChange('')}
             >
               Clear
             </Button>
           )}
         </div>
-      ) : value ? (
+      ) : currentValue ? (
         /* Preview state */
         <div className="relative rounded-xl border border-slate-200 overflow-hidden bg-slate-50 group">
           <img
-            src={value}
+            src={currentValue}
             alt="Uploaded preview"
             className="w-full h-48 object-cover transition-transform group-hover:scale-105 duration-300"
             onError={(e) => {
@@ -165,7 +174,7 @@ export function ImageUploader({
               type="button"
               variant="destructive"
               size="sm"
-              onClick={() => onChange('')}
+              onClick={() => triggerChange('')}
               disabled={uploading}
             >
               Remove
@@ -173,7 +182,7 @@ export function ImageUploader({
           </div>
           <div className="absolute bottom-2 left-2 bg-slate-900/70 backdrop-blur-sm text-white text-xs px-2.5 py-1 rounded-md flex items-center gap-1.5 truncate max-w-[90%]">
             <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400 shrink-0" />
-            <span className="truncate">{value}</span>
+            <span className="truncate">{currentValue}</span>
           </div>
         </div>
       ) : (

@@ -9,6 +9,7 @@ import { HomePage } from "./pages/HomePage";
 import { AboutPage } from "./pages/AboutPage";
 import { ServicesPage } from "./pages/ServicesPage";
 import { BlogPage } from "./pages/BlogPage";
+import { BlogArticlePage } from "./pages/BlogArticlePage";
 import { BookingSuccessPage } from "./pages/BookingSuccessPage";
 import { LoanAssistancePage } from "./pages/services/LoanAssistancePage";
 import { DocumentationPage } from "./pages/services/DocumentationPage";
@@ -63,6 +64,7 @@ function AppShell() {
           <Route path="/services/diaspora-strategy" element={<DiasporaStrategyPage />} />
           <Route path="/listings" element={<PropertyListingsPage />} />
           <Route path="/blog" element={<BlogPage />} />
+          <Route path="/blog/:slug" element={<BlogArticlePage />} />
           <Route path="/contact" element={<Navigate to="/book" replace />} />
           <Route path="/book" element={<BookingPage />} />
           <Route path="/simulator" element={<LoanSimulatorPage />} />
