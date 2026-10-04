@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 
 import { supabase } from '../supabaseClient';
 import { Lock, Mail, Loader2, ArrowRight } from 'lucide-react';
@@ -9,8 +9,8 @@ export function LoginPage() {
     const [password, setPassword] = useState('');
     const [error, setError] = useState('');
     const [loading, setLoading] = useState(false);
-    // const { login } = useAuth(); // Auth is now automatic via Supabase listener
     const navigate = useNavigate();
+    const location = useLocation();
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -24,10 +24,8 @@ export function LoginPage() {
             });
 
             if (error) throw error;
-            // Auth state change is handled by AuthContext listener, 
-            // but we can explicitly navigate or let the effect handle it.
-            // For better UX, we'll navigate here if successful.
-            navigate('/');
+            const destination = (location.state as any)?.from?.pathname || '/admin';
+            navigate(destination, { replace: true });
         } catch (err: any) {
             console.error(err);
             setError(err.message || 'Invalid credentials. Please try again.');

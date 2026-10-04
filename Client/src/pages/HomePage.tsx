@@ -3,9 +3,12 @@ import { Link } from "react-router-dom";
 import { useProperties } from "../hooks/useProperties";
 import { FEATURED_CITIES } from "../utils/constants";
 import { PropertyCard } from "../components/PropertyCard";
+import { ScrollReveal } from "../components/animations/ScrollReveal";
+import { useLanguage } from "../i18n/LanguageContext";
 
 export function HomePage() {
   const { properties, loading, error } = useProperties();
+  const { t } = useLanguage();
 
   return (
     <div className="flex flex-col">
@@ -25,39 +28,39 @@ export function HomePage() {
         <div className="relative z-20 max-w-7xl mx-auto text-center text-white space-y-8 w-full">
           <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/10 backdrop-blur-md border border-white/20 text-accent font-semibold text-sm animate-fade-in-up">
             <span className="w-2 h-2 rounded-full bg-accent animate-pulse" />
-            Leading Real Estate Consultancy in Cameroon
+            {t.hero.badge}
           </div>
 
           <h1 className="font-heading font-bold text-4xl md:text-6xl lg:text-7xl leading-tight max-w-4xl mx-auto text-white">
-            Secure Your Future in <br />
+            {t.hero.title_prefix} <br />
             <span className="text-transparent bg-clip-text bg-gradient-to-r from-accent to-amber-300">
-              African Real Estate
+              {t.hero.title_highlight}
             </span>
           </h1>
 
           <p className="text-base md:text-xl text-slate-300 max-w-2xl mx-auto leading-relaxed">
-            We guide diaspora investors and local businesses through complex property acquisitions, loan financing, and due diligence with 100% transparency.
+            {t.hero.subtitle}
           </p>
 
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4 pt-4 px-4 sm:px-0">
             <Link
-              to="/contact"
+              to="/book"
               className="w-full sm:w-auto justify-center px-8 py-4 bg-accent hover:bg-accent/90 text-white font-bold rounded-full transition-all duration-300 shadow-lg shadow-accent/25 hover:-translate-y-1 flex items-center gap-2"
             >
-              Book Free Consultation
+              {t.hero.cta_primary}
               <ArrowRight className="w-5 h-5" />
             </Link>
             <Link
               to="/listings"
               className="w-full sm:w-auto justify-center px-8 py-4 bg-white/10 hover:bg-white/20 backdrop-blur-md border border-white/20 text-white font-bold rounded-full transition-all duration-300 flex items-center gap-2"
             >
-              View Properties
+              {t.hero.cta_secondary}
             </Link>
           </div>
 
           {/* Trust Ticker */}
           <div className="pt-12 md:pt-16 opacity-70">
-            <p className="text-sm font-medium tracking-widest text-slate-400 mb-6 uppercase">Trusted By Partners In</p>
+            <p className="text-sm font-medium tracking-widest text-slate-400 mb-6 uppercase">{t.hero.trusted_by}</p>
             <div className="flex justify-center gap-8 md:gap-12 grayscale opacity-60 flex-wrap">
               {FEATURED_CITIES.map((city) => (
                 <span key={city} className="font-heading font-bold text-lg md:text-xl">{city}</span>
@@ -71,30 +74,32 @@ export function HomePage() {
       <section className="py-16 md:py-24 bg-surface -mt-20 relative z-30">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6 md:gap-8">
-            {[
+            {([
               {
                 icon: Shield,
-                title: "Due Diligence",
-                desc: "We verify every document, ensuring your land title is genuine and fraud-free."
+                title: t.services_preview.due_diligence.title,
+                desc: t.services_preview.due_diligence.desc
               },
               {
                 icon: LineChart,
-                title: "Investment Strategy",
-                desc: "Data-driven insights to maximize ROI on rental units and land appreciation."
+                title: t.services_preview.investment.title,
+                desc: t.services_preview.investment.desc
               },
               {
                 icon: Building,
-                title: "Loan Assistance",
-                desc: "Expert navigation of Crédit Foncier du Cameroun (CFC) for property funding."
+                title: t.services_preview.loan.title,
+                desc: t.services_preview.loan.desc
               }
-            ].map((service, i) => (
-              <div key={i} className="bg-white p-8 rounded-2xl shadow-xl shadow-slate-200/50 border border-slate-100 hover:-translate-y-2 transition-all duration-300 group">
-                <div className="w-14 h-14 bg-primary/5 rounded-xl flex items-center justify-center mb-6 group-hover:bg-accent group-hover:text-white transition-colors duration-300 text-primary">
-                  <service.icon className="w-7 h-7" />
+            ]).map((service, i) => (
+              <ScrollReveal key={i} staggerIndex={i} className="h-full">
+                <div className="bg-white p-8 rounded-2xl shadow-xl shadow-slate-200/50 border border-slate-100 hover:-translate-y-2 hover:scale-[1.03] transition-all duration-300 group h-full">
+                  <div className="w-14 h-14 bg-primary/5 rounded-xl flex items-center justify-center mb-6 group-hover:bg-accent group-hover:text-white transition-colors duration-300 text-primary">
+                    <service.icon className="w-7 h-7" />
+                  </div>
+                  <h3 className="text-2xl font-bold mb-3 text-primary">{service.title}</h3>
+                  <p className="text-slate-600 leading-relaxed">{service.desc}</p>
                 </div>
-                <h3 className="text-2xl font-bold mb-3 text-primary">{service.title}</h3>
-                <p className="text-slate-600 leading-relaxed">{service.desc}</p>
-              </div>
+              </ScrollReveal>
             ))}
           </div>
         </div>
@@ -104,8 +109,8 @@ export function HomePage() {
       <section className="py-16 md:py-24 bg-surface/50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16">
-            <h2 className="text-4xl font-heading font-bold text-primary mb-4">Featured Opportunities</h2>
-            <p className="text-slate-600 max-w-2xl mx-auto">Exclusive, verified properties selected for high appreciation potential and secure legal standing.</p>
+            <h2 className="text-4xl font-heading font-bold text-primary mb-4">{t.featured.title}</h2>
+            <p className="text-slate-600 max-w-2xl mx-auto">{t.featured.subtitle}</p>
           </div>
 
           {loading ? (
@@ -116,14 +121,16 @@ export function HomePage() {
             <div className="text-center text-red-500 py-12">{error}</div>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-              {properties.slice(0, 3).map((property) => (
-                <PropertyCard key={property.id} property={property} />
+              {properties.slice(0, 3).map((property, index) => (
+                <ScrollReveal key={property.id} staggerIndex={index} className="h-full">
+                  <PropertyCard property={property} />
+                </ScrollReveal>
               ))}
               {properties.length === 0 && (
                 <div className="col-span-full text-center py-12 bg-white rounded-xl border border-dashed border-slate-300">
                   <Building className="w-12 h-12 text-slate-300 mx-auto mb-4" />
-                  <p className="text-slate-500">No active listings allowed for public view at this moment.</p>
-                  <Link to="/contact" className="text-accent font-semibold hover:underline mt-2 inline-block">Contact us for private inventory</Link>
+                  <p className="text-slate-500">{t.featured.no_listings}</p>
+                  <Link to="/book" className="text-accent font-semibold hover:underline mt-2 inline-block">{t.featured.contact_private}</Link>
                 </div>
               )}
             </div>
@@ -132,7 +139,7 @@ export function HomePage() {
           {properties.length > 0 && (
             <div className="mt-12 text-center">
               <Link to="/listings" className="inline-flex items-center gap-2 px-8 py-3 border border-primary text-primary font-bold rounded-full hover:bg-primary hover:text-white transition-all duration-300">
-                View All Listings
+                {t.featured.view_all}
                 <ArrowRight className="w-4 h-4" />
               </Link>
             </div>
@@ -146,20 +153,15 @@ export function HomePage() {
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
             <div className="space-y-8">
               <h2 className="text-4xl md:text-5xl font-heading font-bold text-primary leading-tight">
-                Why Investing in Cameroon is <br />
-                <span className="text-accent">Smarter With Us</span>
+                {t.value_prop.title_prefix} <br />
+                <span className="text-accent">{t.value_prop.title_highlight}</span>
               </h2>
               <p className="text-lg text-slate-600 leading-relaxed">
-                The real estate market is filled with potential, but also hidden risks. We act as your eyes and ears on the ground, shielding you from scams and connecting you to genuine opportunities.
+                {t.value_prop.description}
               </p>
 
               <ul className="space-y-4">
-                {[
-                  "Zero hidden fees or surprise costs.",
-                  "Direct access to verified titles (Titres Fonciers).",
-                  "Comprehensive post-purchase management.",
-                  "Legal backing for every transaction."
-                ].map((item, i) => (
+                {t.value_prop.points.map((item, i) => (
                   <li key={i} className="flex items-center gap-3 text-primary font-medium">
                     <CheckCircle2 className="w-6 h-6 text-accent flex-shrink-0" />
                     {item}
@@ -168,7 +170,7 @@ export function HomePage() {
               </ul>
 
               <Link to="/about" className="inline-block mt-4 text-accent font-bold hover:text-accent/80 transition-colors border-b-2 border-accent/20 hover:border-accent">
-                Read More About Our Mission
+                {t.value_prop.mission_link}
               </Link>
             </div>
 

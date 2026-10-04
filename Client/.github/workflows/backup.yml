@@ -1,0 +1,43 @@
+name: Scheduled Backup
+
+on:
+  schedule:
+    - cron: '0 3 * * *' # daily at 03:00 UTC
+  workflow_dispatch: {}
+
+jobs:
+  backup:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install PostgreSQL client
+        run: sudo apt-get update && sudo apt-get install -y postgresql-client
+
+      - name: Install AWS CLI
+        run: |
+          curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o awscliv2.zip
+          unzip awscliv2.zip
+          sudo ./aws/install
+
+      - name: Run pg_dump and upload
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          BACKUP_S3_BUCKET: ${{ secrets.BACKUP_S3_BUCKET }}
+        run: |
+          set -e
+          TIMESTAMP=$(date -u +"%Y%m%dT%H%M%SZ")
+          echo "Starting backup $TIMESTAMP"
+          if [ -z "$DATABASE_URL" ]; then
+            echo "DATABASE_URL secret not set"; exit 1
+          fi
+          if [ -z "$BACKUP_S3_BUCKET" ]; then
+            echo "BACKUP_S3_BUCKET secret not set"; exit 1
+          fi
+          # Use pg_dump via psql-friendly URL
+          pg_dump "$DATABASE_URL" | gzip > /tmp/db-backup-$TIMESTAMP.sql.gz
+          aws s3 cp /tmp/db-backup-$TIMESTAMP.sql.gz s3://$BACKUP_S3_BUCKET/db-backups/db-backup-$TIMESTAMP.sql.gz
+          echo "Backup uploaded to s3://$BACKUP_S3_BUCKET/db-backups/db-backup-$TIMESTAMP.sql.gz"

@@ -124,10 +124,22 @@ export function LoanAssistancePage() {
           <p className="text-blue-100 text-lg mb-8">
             Let us help you navigate the loan process and secure the financing you need.
           </p>
-          <button className="inline-flex items-center px-8 py-4 bg-white text-blue-600 rounded-lg hover:bg-gray-100 transition-colors">
-            Request Loan Support
-            <ArrowRight className="ml-2 w-5 h-5" />
-          </button>
+          <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
+            <a
+              href="/simulator"
+              className="inline-flex items-center px-8 py-4 bg-white text-blue-600 rounded-lg hover:bg-gray-100 font-bold transition-colors"
+            >
+              Simulate Your CFC Loan
+              <ArrowRight className="ml-2 w-5 h-5" />
+            </a>
+            <a
+              href="/eligibility"
+              className="inline-flex items-center px-8 py-4 bg-amber-500 text-white rounded-lg hover:bg-amber-600 font-bold transition-colors shadow-md"
+            >
+              Check Readiness (Score)
+              <ArrowRight className="ml-2 w-5 h-5" />
+            </a>
+          </div>
         </div>
       </section>
     </div>
