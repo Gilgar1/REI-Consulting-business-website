@@ -274,60 +274,67 @@ export function EligibilityPage() {
           <div className="bg-white rounded-3xl p-6 sm:p-10 border border-slate-100 shadow-xl shadow-slate-200/50 space-y-8 animate-fade-in-up">
             <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-amber-500/10 text-accent font-semibold text-xs border border-amber-500/20">
               <Sparkles className="w-3.5 h-3.5" />
-              {formData.language === 'fr' ? 'Évaluation Prêt CFC en 3 Minutes' : '3-Minute CFC Mortgage Readiness Check'}
+              {formData.language === 'fr' ? 'Évaluation Prêt CFC en 3 Minutes par REI Consulting' : '3-Minute CFC Mortgage Readiness Check by REI Consulting'}
             </div>
 
             <div className="space-y-3">
               <h1 className="text-3xl sm:text-4xl md:text-5xl font-heading font-extrabold text-primary leading-tight">
                 {formData.language === 'fr' ? (
                   <>
-                    Pouvez-vous financer votre projet avec le <span className="text-accent">Crédit Foncier</span> ?
+                    Pouvez-vous financer un bien comme celui-ci avec un <span className="text-accent">prêt immobilier CFC</span> ?
                   </>
                 ) : (
                   <>
-                    Can you finance a property like this with <span className="text-accent">CFC Mortgage</span>?
+                    Can you finance a property like this with a <span className="text-accent">CFC Mortgage</span>?
                   </>
                 )}
               </h1>
               <p className="text-slate-600 text-base md:text-lg leading-relaxed">
                 {formData.language === 'fr'
-                  ? 'Découvrez si votre profil et votre projet répondent aux critères d\'octroi du Crédit Foncier du Cameroun. Obtenez votre score, votre mensualité réelle et votre plan d\'action personnalisé.'
-                  : 'Find out whether your profile and project match Crédit Foncier du Cameroun underwriting standards. Get your eligibility score, exact monthly payment, and tailored roadmap.'}
+                  ? 'Découvrez comment votre profil et votre projet se comparent aux critères d\'octroi du Crédit Foncier du Cameroun. Obtenez une estimation de votre score d\'éligibilité, une estimation de votre mensualité et une feuille de route sur mesure.'
+                  : 'Find out how your profile and project compare with Crédit Foncier du Cameroun lending criteria. Get an estimated eligibility score, estimated monthly payment, and a tailored roadmap.'}
               </p>
             </div>
 
             {/* What you will get */}
             <div className="bg-slate-50 p-6 rounded-2xl border border-slate-100 space-y-3.5">
               <h3 className="font-heading font-bold text-sm text-primary uppercase tracking-wider">
-                {formData.language === 'fr' ? 'Ce que vous obtiendrez instantanément :' : 'What You Will Receive Instantly:'}
+                {formData.language === 'fr' ? 'Ce que vous obtiendrez :' : 'What You Will Receive:'}
               </h3>
               <ul className="space-y-2.5 text-sm text-slate-700">
                 <li className="flex items-start gap-2.5">
                   <CheckCircle2 className="w-4 h-4 text-emerald-500 shrink-0 mt-0.5" />
                   <span>
-                    <strong>{formData.language === 'fr' ? 'Votre Score d\'Éligibilité' : 'Your Eligibility Score'}</strong> :{' '}
-                    {formData.language === 'fr' ? 'Calculé sur 100 points selon les ratios bancaires du CFC.' : 'Scored on 100 points against official lending ratios.'}
+                    <strong>{formData.language === 'fr' ? 'Votre score d\'éligibilité estimé' : 'Your Estimated Eligibility Score'}</strong> :{' '}
+                    {formData.language === 'fr' ? 'noté sur 100 points selon les ratios bancaires publiés.' : 'scored on 100 points against published lending ratios.'}
                   </span>
                 </li>
                 <li className="flex items-start gap-2.5">
                   <CheckCircle2 className="w-4 h-4 text-emerald-500 shrink-0 mt-0.5" />
                   <span>
-                    <strong>{formData.language === 'fr' ? 'Le Produit CFC Adapté' : 'Matched CFC Loan Product'}</strong> :{' '}
-                    {formData.language === 'fr' ? 'Jeune, Social, Acquéreur ou Locatif selon votre profil.' : 'Youth, Social, Purchase, or Rental based on your project.'}
+                    <strong>{formData.language === 'fr' ? 'Produit de prêt CFC probable' : 'Likely CFC Loan Product'}</strong> :{' '}
+                    {formData.language === 'fr' ? 'Jeune, Social, Acquéreur ou Locatif, selon votre projet.' : 'Youth, Social, Purchase, or Rental, based on your project.'}
                   </span>
                 </li>
                 <li className="flex items-start gap-2.5">
                   <CheckCircle2 className="w-4 h-4 text-emerald-500 shrink-0 mt-0.5" />
                   <span>
-                    <strong>{formData.language === 'fr' ? 'Votre Mensualité Réelle' : 'Exact Monthly Payment'}</strong> :{' '}
-                    {formData.language === 'fr' ? 'Simulateur interactif intégré avec cash-flow locatif.' : 'Interactive live simulator with net rental cash flow.'}
+                    <strong>{formData.language === 'fr' ? 'Mensualité estimée' : 'Estimated Monthly Payment'}</strong> :{' '}
+                    {formData.language === 'fr' ? 'simulateur interactif en direct avec flux de trésorerie net de location.' : 'interactive live simulator with net rental cash flow.'}
                   </span>
                 </li>
                 <li className="flex items-start gap-2.5">
                   <CheckCircle2 className="w-4 h-4 text-emerald-500 shrink-0 mt-0.5" />
                   <span>
-                    <strong>{formData.language === 'fr' ? 'Rapport PDF Personnalisé' : 'Personal PDF Report'}</strong> :{' '}
-                    {formData.language === 'fr' ? 'Téléchargeable avec vos chiffres et les leviers d\'optimisation.' : 'Downloadable summary with recommendations to reach 80%+.'}
+                    <strong>{formData.language === 'fr' ? 'Rapport PDF personnel' : 'Personal PDF Report'}</strong> :{' '}
+                    {formData.language === 'fr' ? 'synthèse téléchargeable avec recommandations pour atteindre 80%+.' : 'downloadable summary with recommendations to reach 80%+.'}
+                  </span>
+                </li>
+                <li className="flex items-start gap-2.5">
+                  <CheckCircle2 className="w-4 h-4 text-accent shrink-0 mt-0.5" />
+                  <span>
+                    <strong>{formData.language === 'fr' ? 'Prochaine étape' : 'Next Step'}</strong> :{' '}
+                    {formData.language === 'fr' ? 'si vous êtes éligible, réservez une consultation avec Ndah Gilgar Mbuh pour planifier votre demande de prêt CFC.' : 'if you\'re eligible, book a consultation with Ndah Gilgar Mbuh to plan your CFC loan application.'}
                   </span>
                 </li>
               </ul>
@@ -347,8 +354,8 @@ export function EligibilityPage() {
             <p className="text-xs text-slate-400 italic flex items-center gap-1.5">
               <Lock className="w-3.5 h-3.5 shrink-0" />
               {formData.language === 'fr'
-                ? 'Conseil indépendant. Résultat indicatif confidentiel sans valeur de décision CFC. Vos données restent strictement privées.'
-                : 'Independent advisory. Confidential indicative assessment, not a formal CFC decision. Your data stays private.'}
+                ? 'Il s\'agit d\'un outil indépendant créé par REI Consulting et non d\'un outil officiel du CFC. Les résultats sont des estimations et non une décision de prêt. L\'éligibilité finale est décidée par le CFC.'
+                : 'This is an independent tool by REI Consulting, not an official CFC tool. Results are estimates, not a loan decision. Final eligibility is decided by CFC.'}
             </p>
           </div>
         )}
@@ -919,12 +926,12 @@ export function EligibilityPage() {
                     <div>
                       <h3 className="font-heading font-bold text-emerald-950 text-base flex items-center gap-2">
                         <CheckCircle2 className="w-5 h-5 text-emerald-600" />
-                        {formData.language === 'fr' ? 'Félicitations ! Votre profil est éligible' : 'Congratulations! Your file is qualified'}
+                        {formData.language === 'fr' ? 'Félicitations ! Vous êtes éligible' : 'Congratulations! You\'re Eligible'}
                       </h3>
                       <p className="text-xs text-emerald-800 mt-1 max-w-lg leading-relaxed">
                         {formData.language === 'fr'
-                          ? 'Votre dossier présente tous les signaux favorables pour un accord bancaire CFC. Réservez votre consultation stratégique gratuite avec Gilgar pour lancer le montage.'
-                          : 'Your answers align solidly with CFC underwriting rules. Book your free strategy session with Gilgar now to initiate official file preparation.'}
+                          ? 'Vous êtes éligible ! Réservez une consultation avec Ndah Gilgar Mbuh pour planifier votre demande de prêt CFC.'
+                          : 'You\'re eligible! Book a consultation with Ndah Gilgar Mbuh to plan your CFC loan application.'}
                       </p>
                     </div>
 
@@ -1192,6 +1199,13 @@ export function EligibilityPage() {
                 </div>
               </div>
             )}
+
+            {/* Disclaimer */}
+            <p className="text-xs text-slate-400 italic text-center px-4 pt-2">
+              {formData.language === 'fr'
+                ? 'Il s\'agit d\'un outil indépendant créé par REI Consulting et non d\'un outil officiel du CFC. Les résultats sont des estimations et non une décision de prêt. L\'éligibilité finale est décidée par le CFC.'
+                : 'This is an independent tool by REI Consulting, not an official CFC tool. Results are estimates, not a loan decision. Final eligibility is decided by CFC.'}
+            </p>
           </div>
         )}
       </main>

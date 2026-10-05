@@ -177,16 +177,24 @@ export function LoanSimulatorPage() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10 text-center">
           <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-white/10 backdrop-blur-md border border-white/20 text-accent font-semibold text-xs mb-3">
             <Calculator className="w-3.5 h-3.5" />
-            {language === 'fr' ? 'Simulateur Foncier Officiel CFC' : 'CFC Mortgage Simulation Engine'}
+            {language === 'fr' ? 'Estimateur de Prêt Indépendant par REI Consulting' : 'Independent Loan Estimator by REI Consulting'}
           </div>
           <h1 className="font-heading font-bold text-3xl md:text-5xl text-white mb-3">
             {language === 'fr' ? 'Simulateur de Prêt Immobilier' : 'Real Estate Loan Simulator'}
           </h1>
           <p className="text-slate-300 text-sm md:text-base max-w-2xl mx-auto">
             {language === 'fr'
-              ? 'Calculez instantanément vos mensualités réelles, votre apport personnel requis et la rentabilité de votre projet avec les barèmes officiels du Crédit Foncier du Cameroun.'
-              : 'Calculate your exact monthly payments, required down payment, and investment cash flows using official Crédit Foncier du Cameroun guidelines.'}
+              ? 'Estimez vos mensualités, l\'apport personnel requis et les flux de trésorerie de votre investissement d\'après les conditions de prêt publiées du Crédit Foncier du Cameroun.'
+              : 'Estimate your monthly payments, required down payment, and investment cash flows based on published Crédit Foncier du Cameroun loan terms.'}
           </p>
+          <div className="mt-4 inline-flex items-center justify-center gap-2 text-xs text-amber-200/90 bg-white/10 backdrop-blur-md border border-amber-400/30 px-4 py-2 rounded-xl max-w-2xl mx-auto text-left sm:text-center">
+            <AlertCircle className="w-4 h-4 shrink-0 text-amber-400" />
+            <span>
+              {language === 'fr'
+                ? 'Ce simulateur n\'est pas l\'outil officiel du CFC. Il s\'agit d\'un outil indépendant créé par REI Consulting pour vous donner une estimation approximative. Les conditions finales, les taux et l\'approbation sont déterminés exclusivement par le CFC.'
+                : 'This is not the official CFC loan simulator. It is an independent tool created by REI Consulting to give you a rough estimate. Final terms, rates, and approval are determined solely by CFC.'}
+            </span>
+          </div>
         </div>
       </section>
 
@@ -701,6 +709,35 @@ export function LoanSimulatorPage() {
                   </Link>
                 </Button>
               </div>
+
+              {/* CTA below results */}
+              <div className="p-4 rounded-xl bg-gradient-to-br from-amber-500/10 via-amber-50/60 to-primary/5 border border-amber-200/90 mt-2">
+                <div className="flex flex-col gap-2.5">
+                  <div className="flex items-start gap-2.5">
+                    <div className="w-7 h-7 rounded-full bg-accent/15 flex items-center justify-center shrink-0 mt-0.5">
+                      <Calendar className="w-3.5 h-3.5 text-accent" />
+                    </div>
+                    <div>
+                      <h4 className="text-xs font-bold text-primary">
+                        {language === 'fr'
+                          ? 'Éligible et prêt à aller de l\'avant ?'
+                          : 'Eligible and ready to move forward?'}
+                      </h4>
+                      <p className="text-[11.5px] text-slate-600 leading-relaxed mt-1">
+                        {language === 'fr'
+                          ? 'Réservez une consultation avec Ndah Gilgar Mbuh. REI Consulting aide ses clients à préparer et soumettre leurs dossiers de prêt CFC, et Gilgar possède une connaissance approfondie de la procédure du CFC.'
+                          : 'Book a consultation with Ndah Gilgar Mbuh. REI Consulting helps clients prepare and submit CFC loan applications, and Gilgar has in-depth knowledge of the CFC loan process.'}
+                      </p>
+                    </div>
+                  </div>
+                  <Button asChild size="sm" className="w-full bg-primary hover:bg-primary/90 text-white text-xs font-bold shadow-sm">
+                    <Link to="/book" className="flex items-center justify-center gap-2">
+                      <span>{language === 'fr' ? 'Réserver une consultation' : 'Book a Consultation'}</span>
+                      <ArrowRight className="w-3.5 h-3.5 text-accent" />
+                    </Link>
+                  </Button>
+                </div>
+              </div>
             </div>
 
             {/* Toggleable Amortization Schedule */}
@@ -745,8 +782,8 @@ export function LoanSimulatorPage() {
             {/* Disclaimer */}
             <p className="text-[11px] text-slate-400 leading-relaxed italic px-2">
               {language === 'fr'
-                ? 'Cette simulation est indicative et basée sur les conditions du Crédit Foncier du Cameroun. Elle ne constitue ni une offre de prêt ni un engagement contractuel. La décision finale et les conditions d\'octroi relèvent du prêteur après étude du dossier complet.'
-                : 'This simulation is indicative and based on published Crédit Foncier du Cameroun terms. It does not constitute a formal loan offer or credit commitment. Final terms and approval are determined by the lender upon full file review.'}
+                ? 'Ce simulateur n\'est pas l\'outil officiel du CFC. Il s\'agit d\'un outil indépendant créé par REI Consulting pour vous donner une estimation approximative. Les conditions finales, les taux et l\'approbation sont déterminés exclusivement par le CFC.'
+                : 'This is not the official CFC loan simulator. It is an independent tool created by REI Consulting to give you a rough estimate. Final terms, rates, and approval are determined solely by CFC.'}
             </p>
           </div>
         </div>
