@@ -35,14 +35,64 @@ import {
   Sparkles,
   HelpCircle,
   Loader2,
-  Lock
+  Lock,
+  Hammer,
+  MapPin,
+  Globe,
+  Search,
+  ChevronDown
 } from 'lucide-react';
+
+export const COUNTRIES_LIST = [
+  { code: 'CM', nameEn: 'Cameroon', nameFr: 'Cameroun', flag: '🇨🇲' },
+  { code: 'FR', nameEn: 'France', nameFr: 'France', flag: '🇫🇷' },
+  { code: 'US', nameEn: 'United States', nameFr: 'États-Unis', flag: '🇺🇸' },
+  { code: 'CA', nameEn: 'Canada', nameFr: 'Canada', flag: '🇨🇦' },
+  { code: 'GB', nameEn: 'United Kingdom', nameFr: 'Royaume-Uni', flag: '🇬🇧' },
+  { code: 'BE', nameEn: 'Belgium', nameFr: 'Belgique', flag: '🇧🇪' },
+  { code: 'DE', nameEn: 'Germany', nameFr: 'Allemagne', flag: '🇩🇪' },
+  { code: 'IT', nameEn: 'Italy', nameFr: 'Italie', flag: '🇮🇹' },
+  { code: 'CH', nameEn: 'Switzerland', nameFr: 'Suisse', flag: '🇨🇭' },
+  { code: 'ES', nameEn: 'Spain', nameFr: 'Espagne', flag: '🇪🇸' },
+  { code: 'AE', nameEn: 'United Arab Emirates', nameFr: 'Émirats Arabes Unis', flag: '🇦🇪' },
+  { code: 'GA', nameEn: 'Gabon', nameFr: 'Gabon', flag: '🇬🇦' },
+  { code: 'GQ', nameEn: 'Equatorial Guinea', nameFr: 'Guinée Équatoriale', flag: '🇬🇶' },
+  { code: 'TD', nameEn: 'Chad', nameFr: 'Tchad', flag: '🇹🇩' },
+  { code: 'CG', nameEn: 'Republic of the Congo', nameFr: 'Congo-Brazzaville', flag: '🇨🇬' },
+  { code: 'CD', nameEn: 'DR Congo', nameFr: 'RD Congo', flag: '🇨🇩' },
+  { code: 'CI', nameEn: 'Ivory Coast', nameFr: 'Côte d’Ivoire', flag: '🇨🇮' },
+  { code: 'SN', nameEn: 'Senegal', nameFr: 'Sénégal', flag: '🇸🇳' },
+  { code: 'NG', nameEn: 'Nigeria', nameFr: 'Nigéria', flag: '🇳🇬' },
+  { code: 'ZA', nameEn: 'South Africa', nameFr: 'Afrique du Sud', flag: '🇿🇦' },
+  { code: 'CN', nameEn: 'China', nameFr: 'Chine', flag: '🇨🇳' },
+  { code: 'NL', nameEn: 'Netherlands', nameFr: 'Pays-Bas', flag: '🇳🇱' },
+  { code: 'SE', nameEn: 'Sweden', nameFr: 'Suède', flag: '🇸🇪' },
+  { code: 'NO', nameEn: 'Norway', nameFr: 'Norvège', flag: '🇳🇴' },
+  { code: 'LU', nameEn: 'Luxembourg', nameFr: 'Luxembourg', flag: '🇱🇺' },
+  { code: 'AU', nameEn: 'Australia', nameFr: 'Australie', flag: '🇦🇺' },
+  { code: 'BR', nameEn: 'Brazil', nameFr: 'Brésil', flag: '🇧🇷' },
+  { code: 'OTHER', nameEn: 'Other Country', nameFr: 'Autre pays', flag: '🌐' },
+];
+
+export const CAMEROON_REGIONS = [
+  { id: 'Centre', en: 'Centre (Yaoundé, Mbalmayo...)', fr: 'Centre (Yaoundé, Mbalmayo...)' },
+  { id: 'Littoral', en: 'Littoral (Douala, Edéa...)', fr: 'Littoral (Douala, Edéa...)' },
+  { id: 'Ouest', en: 'West / Ouest (Bafoussam, Dschang...)', fr: 'Ouest (Bafoussam, Dschang...)' },
+  { id: 'Sud-Ouest', en: 'South-West (Buea, Limbe, Kumba...)', fr: 'Sud-Ouest (Buea, Limbe, Kumba...)' },
+  { id: 'Nord-Ouest', en: 'North-West (Bamenda...)', fr: 'Nord-Ouest (Bamenda...)' },
+  { id: 'Sud', en: 'South / Sud (Kribi, Ebolowa...)', fr: 'Sud (Kribi, Ebolowa...)' },
+  { id: 'Adamaoua', en: 'Adamawa / Adamaoua (Ngaoundéré...)', fr: 'Adamaoua (Ngaoundéré...)' },
+  { id: 'Nord', en: 'North / Nord (Garoua...)', fr: 'Nord (Garoua...)' },
+  { id: 'Extreme-Nord', en: 'Far North / Extrême-Nord (Maroua...)', fr: 'Extrême-Nord (Maroua...)' },
+  { id: 'Est', en: 'East / Est (Bertoua...)', fr: 'Est (Bertoua...)' },
+];
 
 interface FormData {
   language: 'en' | 'fr';
-  projectType: 'buy' | 'build';
+  projectType: 'buy' | 'build' | 'buy_renovate';
   propertyPurpose: 'residential' | 'rental' | 'development';
-  hasTitle: boolean | null;
+  propertyRegion: string;
+  hasTitle: boolean;
   projectCost: number;
   ownFunds: number;
   expectedMonthlyRent: number;
@@ -52,6 +102,8 @@ interface FormData {
   monthlyIncome: number;
   monthlyDebt: number;
   totalDebt: number;
+  residenceType: 'cameroon' | 'diaspora';
+  residenceCountry: string;
   location: string;
   // Contact & Unlock
   title: string;
@@ -68,11 +120,16 @@ export function EligibilityPage() {
   const [submitting, setSubmitting] = useState(false);
   const [downloadingPDF, setDownloadingPDF] = useState(false);
 
+  // Country dropdown state for Diaspora selection
+  const [isCountryDropdownOpen, setIsCountryDropdownOpen] = useState(false);
+  const [countrySearchQuery, setCountrySearchQuery] = useState('');
+
   // Form State with sensible Cameroon real estate defaults
   const [formData, setFormData] = useState<FormData>({
     language: (language as 'en' | 'fr') || 'en',
     projectType: 'buy',
     propertyPurpose: 'residential',
+    propertyRegion: 'Centre',
     hasTitle: true,
     projectCost: 35000000, // 35M FCFA
     ownFunds: 10000000, // 10M FCFA
@@ -83,7 +140,9 @@ export function EligibilityPage() {
     monthlyIncome: 850000,
     monthlyDebt: 50000,
     totalDebt: 1500000,
-    location: 'In Cameroon (Yaoundé / Douala)',
+    residenceType: 'cameroon',
+    residenceCountry: 'Cameroon',
+    location: 'In Cameroon (Resident)',
     title: 'Mr',
     fullName: '',
     phone: '',
@@ -107,6 +166,17 @@ export function EligibilityPage() {
   };
 
   const handleNextStep = () => {
+    // Validation for Step 3: Monthly Income is required (cannot be empty or 0), but no minimum amount floor
+    if (step === 3) {
+      if (!formData.monthlyIncome || formData.monthlyIncome <= 0) {
+        alert(
+          formData.language === 'fr'
+            ? 'Veuillez renseigner votre revenu net mensuel (champ obligatoire).'
+            : 'Please enter your monthly net income (required field).'
+        );
+        return;
+      }
+    }
     window.scrollTo({ top: 0, behavior: 'smooth' });
     setStep((prev) => prev + 1);
   };
@@ -130,10 +200,17 @@ export function EligibilityPage() {
 
     setSubmitting(true);
 
+    const formattedLocation =
+      formData.residenceType === 'cameroon'
+        ? (formData.language === 'fr' ? 'Au Cameroun (Résident)' : 'In Cameroon (Resident)')
+        : `Diaspora - ${formData.residenceCountry || 'Abroad'}`;
+
     // Compute Eligibility Score & Matched Product
     const scoreInput: ScoreInput = {
       projectType: formData.projectType,
       propertyPurpose: formData.propertyPurpose,
+      propertyRegion: formData.propertyRegion,
+      hasTitle: formData.hasTitle,
       projectCost: formData.projectCost,
       ownFunds: formData.ownFunds,
       totalDebt: formData.monthlyDebt,
@@ -141,13 +218,15 @@ export function EligibilityPage() {
       age: formData.age,
       monthlyIncome: formData.monthlyIncome,
       employmentType: formData.employmentType,
-      hasTitle: formData.projectType === 'build' ? formData.hasTitle : true,
-      location: formData.location,
+      location: formattedLocation,
+      residenceType: formData.residenceType,
+      residenceCountry: formData.residenceCountry,
     };
 
     const evalResult = calculateEligibility(scoreInput);
     setResult(evalResult);
-    setSimTerm(Math.min(evalResult.matchedProduct.maxTermYears, Math.max(5, 65 - formData.age)));
+    const maxRetireTerm = Math.min(evalResult.matchedProduct.maxTermYears, Math.max(1, 65 - formData.age));
+    setSimTerm(maxRetireTerm);
     setSimContribution(formData.ownFunds);
 
     // Store Submission in Supabase eligibility_leads table
@@ -159,7 +238,8 @@ export function EligibilityPage() {
         language: formData.language,
         project_type: formData.projectType,
         property_purpose: formData.propertyPurpose,
-        has_title: formData.projectType === 'build' ? formData.hasTitle : true,
+        property_region: formData.propertyRegion,
+        has_title: formData.hasTitle,
         project_cost: formData.projectCost,
         own_funds: formData.ownFunds,
         total_debt: formData.monthlyDebt,
@@ -167,7 +247,7 @@ export function EligibilityPage() {
         age: formData.age,
         monthly_income: formData.monthlyIncome,
         employment_type: formData.employmentType,
-        location: formData.location,
+        location: formattedLocation,
         matched_loan_type: evalResult.matchedProduct.label.en,
         score: evalResult.score,
         band: evalResult.band,
@@ -374,12 +454,12 @@ export function EligibilityPage() {
               </h2>
             </div>
 
-            {/* Project Type: Buy vs Build */}
+            {/* Project Type: Buy vs Build vs Buy & Renovate */}
             <div className="space-y-2">
               <label className="text-xs font-bold uppercase tracking-wider text-slate-700">
                 {formData.language === 'fr' ? '1. Type d\'opération' : '1. Project Type'}
               </label>
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                 <button
                   type="button"
                   onClick={() => updateField('projectType', 'buy')}
@@ -391,7 +471,7 @@ export function EligibilityPage() {
                 >
                   <Home className="w-6 h-6 text-accent mb-2" />
                   <p className="font-bold text-sm">{formData.language === 'fr' ? 'Acheter un bien' : 'Buy a Property'}</p>
-                  <p className="text-xs text-slate-500 mt-1">{formData.language === 'fr' ? 'Terrain ou logement déjà construit' : 'Land or finished dwelling'}</p>
+                  <p className="text-xs text-slate-500 mt-1">{formData.language === 'fr' ? 'Terrain ou logement déjà construit' : 'Land or finished home'}</p>
                 </button>
 
                 <button
@@ -405,7 +485,21 @@ export function EligibilityPage() {
                 >
                   <Building className="w-6 h-6 text-accent mb-2" />
                   <p className="font-bold text-sm">{formData.language === 'fr' ? 'Construire' : 'Build from Scratch'}</p>
-                  <p className="text-xs text-slate-500 mt-1">{formData.language === 'fr' ? 'Chantier de construction neuve' : 'New construction project'}</p>
+                  <p className="text-xs text-slate-500 mt-1">{formData.language === 'fr' ? 'Chantier de construction neuve' : 'New build on raw land'}</p>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => updateField('projectType', 'buy_renovate')}
+                  className={`p-4 rounded-2xl border text-left transition-all ${
+                    formData.projectType === 'buy_renovate'
+                      ? 'border-accent bg-amber-50/40 ring-2 ring-accent text-primary'
+                      : 'border-slate-200 hover:bg-slate-50 text-slate-600'
+                  }`}
+                >
+                  <Hammer className="w-6 h-6 text-accent mb-2" />
+                  <p className="font-bold text-sm">{formData.language === 'fr' ? 'Acheter et Rénover' : 'Buy and Renovate'}</p>
+                  <p className="text-xs text-slate-500 mt-1">{formData.language === 'fr' ? 'Acquisition + enveloppe de travaux' : 'Purchase + renovation budget'}</p>
                 </button>
               </div>
             </div>
@@ -438,46 +532,88 @@ export function EligibilityPage() {
               </div>
             </div>
 
-            {/* Titled Land Gate (Only shown if Build) */}
-            {formData.projectType === 'build' && (
-              <div className="p-4 rounded-2xl bg-amber-50/60 border border-amber-200 space-y-3">
-                <div className="flex items-center gap-2">
-                  <ShieldCheck className="w-5 h-5 text-accent" />
-                  <label className="text-xs font-bold uppercase tracking-wider text-amber-950">
-                    {formData.language === 'fr' ? 'Possédez-vous déjà un Titre Foncier pour ce terrain ?' : 'Do you already own titled land for this build?'}
+            {/* Property Location: Region in Cameroon */}
+            <div className="space-y-2">
+              <label className="text-xs font-bold uppercase tracking-wider text-slate-700 flex items-center gap-1.5">
+                <MapPin className="w-3.5 h-3.5 text-accent" />
+                <span>{formData.language === 'fr' ? '3. Localisation du bien (Région au Cameroun)' : '3. Property Location (Region in Cameroon)'}</span>
+              </label>
+              <select
+                value={formData.propertyRegion}
+                onChange={(e) => updateField('propertyRegion', e.target.value)}
+                className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-medium focus:outline-none focus:ring-2 focus:ring-accent"
+              >
+                {CAMEROON_REGIONS.map((reg) => (
+                  <option key={reg.id} value={reg.id}>
+                    {formData.language === 'fr' ? reg.fr : reg.en}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            {/* Titled Land Gate (Mandatory Deal-Breaker for ALL projects) */}
+            <div className="p-5 rounded-2xl bg-amber-50/70 border border-amber-200/90 space-y-3">
+              <div className="flex items-start gap-2.5">
+                <ShieldCheck className="w-5 h-5 text-accent shrink-0 mt-0.5" />
+                <div>
+                  <label className="text-xs font-bold uppercase tracking-wider text-amber-950 block">
+                    {formData.language === 'fr'
+                      ? '4. Le terrain / bien fait-il l\'objet d\'un Titre Foncier immatriculé ?'
+                      : '4. Is the property / land covered by a registered Land Title (Titre Foncier)?'}
                   </label>
-                </div>
-                <p className="text-xs text-amber-900 leading-relaxed">
-                  {formData.language === 'fr'
-                    ? 'Le CFC exige obligatoirement une hypothèque sur Titre Foncier immatriculé pour débloquer un crédit de construction.'
-                    : 'CFC legally requires a registered land title (Titre Foncier) to mortgage before disbursing construction funds.'}
-                </p>
-                <div className="flex gap-4">
-                  <button
-                    type="button"
-                    onClick={() => updateField('hasTitle', true)}
-                    className={`flex-1 py-2.5 px-4 rounded-xl font-bold text-sm border transition-all ${
-                      formData.hasTitle === true
-                        ? 'bg-accent text-white border-accent'
-                        : 'bg-white text-slate-700 border-slate-300'
-                    }`}
-                  >
-                    {formData.language === 'fr' ? 'Oui, Titre Foncier en règle' : 'Yes, Land is Titled'}
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => updateField('hasTitle', false)}
-                    className={`flex-1 py-2.5 px-4 rounded-xl font-bold text-sm border transition-all ${
-                      formData.hasTitle === false
-                        ? 'bg-accent text-white border-accent'
-                        : 'bg-white text-slate-700 border-slate-300'
-                    }`}
-                  >
-                    {formData.language === 'fr' ? 'Non / Pas encore de titre' : 'No / Not yet titled'}
-                  </button>
+                  <span className="text-[11px] font-bold text-amber-800">
+                    {formData.language === 'fr'
+                      ? 'Obligation légale CFC — Condition éliminatoire'
+                      : 'CFC Legal Obligation — Deal Breaker'}
+                  </span>
                 </div>
               </div>
-            )}
+              <p className="text-xs text-amber-900 leading-relaxed">
+                {formData.language === 'fr'
+                  ? 'Le Crédit Foncier du Cameroun exige impérativement un Titre Foncier en règle pour inscrire son hypothèque de premier rang. Le CFC ne finance aucun terrain coutumier ou sans titre.'
+                  : 'Crédit Foncier du Cameroun legally requires a registered Land Title (Titre Foncier) to secure its mortgage. CFC cannot finance customary or untitled land.'}
+              </p>
+              <div className="grid grid-cols-2 gap-3">
+                <button
+                  type="button"
+                  onClick={() => updateField('hasTitle', true)}
+                  className={`py-2.5 px-4 rounded-xl font-bold text-xs sm:text-sm border transition-all flex items-center justify-center gap-2 ${
+                    formData.hasTitle === true
+                      ? 'bg-emerald-600 text-white border-emerald-600 shadow-sm'
+                      : 'bg-white text-slate-700 border-slate-300 hover:bg-slate-50'
+                  }`}
+                >
+                  <CheckCircle2 className="w-4 h-4 shrink-0" />
+                  <span>{formData.language === 'fr' ? 'Oui, Titre Foncier en règle' : 'Yes, Land is Titled'}</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => updateField('hasTitle', false)}
+                  className={`py-2.5 px-4 rounded-xl font-bold text-xs sm:text-sm border transition-all flex items-center justify-center gap-2 ${
+                    formData.hasTitle === false
+                      ? 'bg-rose-600 text-white border-rose-600 shadow-sm'
+                      : 'bg-white text-slate-700 border-slate-300 hover:bg-slate-50'
+                  }`}
+                >
+                  <AlertCircle className="w-4 h-4 shrink-0" />
+                  <span>{formData.language === 'fr' ? 'Non / Pas de Titre Foncier' : 'No / Untitled Land'}</span>
+                </button>
+              </div>
+
+              {formData.hasTitle === false && (
+                <div className="p-3.5 rounded-xl bg-rose-50 border border-rose-200 text-xs text-rose-900 space-y-1 animate-fade-in">
+                  <div className="font-bold flex items-center gap-1.5 text-rose-700">
+                    <AlertCircle className="w-4 h-4 shrink-0" />
+                    <span>{formData.language === 'fr' ? 'Condition bloquante pour l\'octroi du crédit' : 'Warning: Deal-Breaker for CFC Approval'}</span>
+                  </div>
+                  <p className="leading-relaxed text-[11.5px]">
+                    {formData.language === 'fr'
+                      ? 'Un terrain non titré ne peut recevoir aucun accord de financement du CFC. REI Consulting propose un accompagnement pour vous aider à auditer et régulariser votre titre foncier.'
+                      : 'Untitled land cannot receive CFC mortgage approval. REI Consulting provides assistance to audit, verify, and regularize your land title beforehand.'}
+                  </p>
+                </div>
+              )}
+            </div>
 
             {/* Navigation buttons */}
             <div className="flex justify-between items-center pt-4 border-t border-slate-100">
@@ -638,20 +774,31 @@ export function EligibilityPage() {
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               {/* Age */}
               <div className="space-y-1.5">
-                <label className="text-xs font-bold uppercase tracking-wider text-slate-700">
-                  {formData.language === 'fr' ? 'Âge de l\'emprunteur' : 'Age of Borrower'}
-                </label>
+                <div className="flex justify-between items-center">
+                  <label className="text-xs font-bold uppercase tracking-wider text-slate-700">
+                    {formData.language === 'fr' ? 'Âge de l\'emprunteur' : 'Age of Borrower'}
+                  </label>
+                  <span className="text-[11px] font-semibold text-accent">
+                    {formData.age >= 65 ? (
+                      formData.language === 'fr' ? '⚠️ Retraite atteinte (65 ans)' : '⚠️ Retirement reached (65 yrs)'
+                    ) : (
+                      formData.language === 'fr'
+                        ? `Durée max : ${Math.max(1, 65 - formData.age)} ans (retraite à 65 ans)`
+                        : `Max payoff: ${Math.max(1, 65 - formData.age)} yrs (retire at 65)`
+                    )}
+                  </span>
+                </div>
                 <Input
                   type="number"
                   min="18"
-                  max="70"
+                  max="75"
                   value={formData.age}
                   onChange={(e) => updateField('age', Number(e.target.value))}
                 />
-                <span className="text-[11px] text-slate-400">
+                <span className="text-[11px] text-slate-400 block">
                   {formData.age < 35
                     ? (formData.language === 'fr' ? '✓ Éligible au Prêt Jeune CFC (< 35 ans)' : '✓ Eligible for CFC Youth Loan (< 35 yrs)')
-                    : ''}
+                    : (formData.language === 'fr' ? 'Limite d\'âge à l\'échéance du prêt : 65 ans révolus' : 'Legal maturity age ceiling: 65 years')}
                 </span>
               </div>
 
@@ -674,49 +821,164 @@ export function EligibilityPage() {
             {/* Monthly Net Income */}
             <div className="space-y-1.5">
               <label className="text-xs font-bold uppercase tracking-wider text-slate-700">
-                {formData.language === 'fr' ? 'Revenu net mensuel moyen (Toutes sources, en FCFA)' : 'Average Monthly Net Income (FCFA)'}
+                {formData.language === 'fr'
+                  ? 'Revenu net mensuel moyen (Toutes sources, en FCFA) *'
+                  : 'Average Monthly Net Income (All sources, in FCFA) *'}
               </label>
               <Input
                 type="number"
-                step="50000"
-                value={formData.monthlyIncome}
-                onChange={(e) => updateField('monthlyIncome', Math.max(100000, Number(e.target.value)))}
+                min="0"
+                step="10000"
+                value={formData.monthlyIncome || ''}
+                onChange={(e) => updateField('monthlyIncome', Math.max(0, Number(e.target.value)))}
+                placeholder={formData.language === 'fr' ? 'Ex: 150000' : 'e.g. 150000'}
+                required
               />
+              <span className="text-[11px] text-slate-400">
+                {formData.language === 'fr'
+                  ? 'Champ obligatoire — aucun montant minimum requis'
+                  : 'Required field — no minimum income floor'}
+              </span>
             </div>
 
             {/* Existing Debts */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <div className="space-y-1.5">
-                <label className="text-xs font-bold uppercase tracking-wider text-slate-700">
-                  {formData.language === 'fr' ? 'Mensualités de dettes actuelles (FCFA/mois)' : 'Monthly Debt Payments (FCFA/mo)'}
-                </label>
-                <Input
-                  type="number"
-                  step="10000"
-                  value={formData.monthlyDebt}
-                  onChange={(e) => updateField('monthlyDebt', Math.max(0, Number(e.target.value)))}
-                />
-                <span className="text-[11px] text-slate-400">
-                  {formData.language === 'fr' ? 'Crédits en cours, tontines ou retenues' : 'Ongoing loans or payroll deductions'}
-                </span>
+            <div className="space-y-1.5">
+              <label className="text-xs font-bold uppercase tracking-wider text-slate-700">
+                {formData.language === 'fr' ? 'Mensualités de dettes actuelles (FCFA/mois)' : 'Monthly Debt Payments (FCFA/mo)'}
+              </label>
+              <Input
+                type="number"
+                step="10000"
+                value={formData.monthlyDebt}
+                onChange={(e) => updateField('monthlyDebt', Math.max(0, Number(e.target.value)))}
+              />
+              <span className="text-[11px] text-slate-400">
+                {formData.language === 'fr' ? 'Crédits en cours, tontines ou retenues sur salaire' : 'Ongoing loans, tontines, or payroll deductions'}
+              </span>
+            </div>
+
+            {/* Residence Selection: In Cameroon vs Diaspora with Searchable Country Dropdown */}
+            <div className="space-y-3 pt-2 border-t border-slate-100">
+              <label className="text-xs font-bold uppercase tracking-wider text-slate-700 block">
+                {formData.language === 'fr' ? 'Lieu de résidence de l\'emprunteur' : 'Borrower Residence Location'}
+              </label>
+
+              <div className="grid grid-cols-2 gap-3">
+                <button
+                  type="button"
+                  onClick={() => {
+                    updateField('residenceType', 'cameroon');
+                    updateField('residenceCountry', 'Cameroon');
+                    updateField('location', 'In Cameroon (Resident)');
+                    setIsCountryDropdownOpen(false);
+                  }}
+                  className={`py-2.5 px-4 rounded-xl font-bold text-xs sm:text-sm border transition-all flex items-center justify-center gap-2 ${
+                    formData.residenceType === 'cameroon'
+                      ? 'bg-primary text-white border-primary shadow-sm'
+                      : 'bg-white text-slate-700 border-slate-200 hover:bg-slate-50'
+                  }`}
+                >
+                  <span className="text-base">🇨🇲</span>
+                  <span>{formData.language === 'fr' ? 'Au Cameroun (Résident)' : 'In Cameroon (Resident)'}</span>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => {
+                    updateField('residenceType', 'diaspora');
+                    if (formData.residenceCountry === 'Cameroon') {
+                      updateField('residenceCountry', 'France');
+                    }
+                    setIsCountryDropdownOpen(true);
+                  }}
+                  className={`py-2.5 px-4 rounded-xl font-bold text-xs sm:text-sm border transition-all flex items-center justify-center gap-2 ${
+                    formData.residenceType === 'diaspora'
+                      ? 'bg-accent text-white border-accent shadow-sm'
+                      : 'bg-white text-slate-700 border-slate-200 hover:bg-slate-50'
+                  }`}
+                >
+                  <Globe className="w-4 h-4 shrink-0" />
+                  <span>{formData.language === 'fr' ? 'Diaspora (À l\'étranger)' : 'Diaspora (Abroad)'}</span>
+                </button>
               </div>
 
-              {/* Location / Diaspora */}
-              <div className="space-y-1.5">
-                <label className="text-xs font-bold uppercase tracking-wider text-slate-700">
-                  {formData.language === 'fr' ? 'Lieu de résidence' : 'Current Residence'}
-                </label>
-                <select
-                  value={formData.location}
-                  onChange={(e) => updateField('location', e.target.value)}
-                  className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-accent"
-                >
-                  <option value="In Cameroon (Yaoundé / Douala)">{formData.language === 'fr' ? 'Au Cameroun (Résident)' : 'In Cameroon (Resident)'}</option>
-                  <option value="Abroad (Diaspora - Europe)">{formData.language === 'fr' ? 'Diaspora (Europe)' : 'Diaspora (Europe)'}</option>
-                  <option value="Abroad (Diaspora - North America)">{formData.language === 'fr' ? 'Diaspora (Amérique du Nord)' : 'Diaspora (North America)'}</option>
-                  <option value="Abroad (Diaspora - Other)">{formData.language === 'fr' ? 'Diaspora (Autre pays)' : 'Diaspora (Other)'}</option>
-                </select>
-              </div>
+              {formData.residenceType === 'diaspora' && (
+                <div className="space-y-1.5 p-4 rounded-2xl bg-amber-50/50 border border-amber-200/70 animate-fade-in">
+                  <label className="text-xs font-bold text-amber-950 block">
+                    {formData.language === 'fr' ? 'Sélectionnez votre pays de résidence :' : 'Select your country of residence:'}
+                  </label>
+
+                  {/* Searchable Dropdown */}
+                  <div className="relative">
+                    <button
+                      type="button"
+                      onClick={() => setIsCountryDropdownOpen(!isCountryDropdownOpen)}
+                      className="w-full px-3.5 py-2.5 bg-white border border-slate-300 rounded-xl text-sm font-semibold flex items-center justify-between text-left shadow-sm focus:outline-none focus:ring-2 focus:ring-accent"
+                    >
+                      <div className="flex items-center gap-2">
+                        <span>{COUNTRIES_LIST.find((c) => c.nameEn === formData.residenceCountry || c.nameFr === formData.residenceCountry)?.flag || '🌍'}</span>
+                        <span className="text-slate-900">
+                          {formData.language === 'fr'
+                            ? (COUNTRIES_LIST.find((c) => c.nameEn === formData.residenceCountry)?.nameFr || formData.residenceCountry)
+                            : (COUNTRIES_LIST.find((c) => c.nameFr === formData.residenceCountry)?.nameEn || formData.residenceCountry)}
+                        </span>
+                      </div>
+                      <ChevronDown className={`w-4 h-4 text-slate-400 transition-transform ${isCountryDropdownOpen ? 'rotate-180' : ''}`} />
+                    </button>
+
+                    {isCountryDropdownOpen && (
+                      <div className="absolute top-full left-0 right-0 mt-1.5 bg-white border border-slate-200 rounded-xl shadow-xl z-50 overflow-hidden animate-fade-in-up">
+                        <div className="p-2 border-b border-slate-100 flex items-center gap-2 bg-slate-50">
+                          <Search className="w-4 h-4 text-slate-400 shrink-0" />
+                          <input
+                            type="text"
+                            value={countrySearchQuery}
+                            onChange={(e) => setCountrySearchQuery(e.target.value)}
+                            placeholder={formData.language === 'fr' ? 'Rechercher un pays...' : 'Search a country...'}
+                            className="w-full bg-transparent text-xs text-slate-900 placeholder-slate-400 focus:outline-none"
+                            autoFocus
+                          />
+                        </div>
+                        <div className="max-h-56 overflow-y-auto divide-y divide-slate-100">
+                          {COUNTRIES_LIST.filter((c) => {
+                            const q = countrySearchQuery.toLowerCase().trim();
+                            if (!q) return true;
+                            return (
+                              c.nameEn.toLowerCase().includes(q) ||
+                              c.nameFr.toLowerCase().includes(q) ||
+                              c.code.toLowerCase().includes(q)
+                            );
+                          }).map((c) => (
+                            <button
+                              key={c.code}
+                              type="button"
+                              onClick={() => {
+                                updateField('residenceCountry', c.nameEn);
+                                updateField('location', `Diaspora - ${c.nameEn}`);
+                                setIsCountryDropdownOpen(false);
+                                setCountrySearchQuery('');
+                              }}
+                              className={`w-full px-3.5 py-2 text-xs flex items-center justify-between text-left transition-colors ${
+                                formData.residenceCountry === c.nameEn
+                                  ? 'bg-accent/10 font-bold text-accent'
+                                  : 'text-slate-700 hover:bg-slate-50'
+                              }`}
+                            >
+                              <div className="flex items-center gap-2.5">
+                                <span className="text-base">{c.flag}</span>
+                                <span>{formData.language === 'fr' ? c.nameFr : c.nameEn}</span>
+                              </div>
+                              {formData.residenceCountry === c.nameEn && (
+                                <CheckCircle2 className="w-3.5 h-3.5 text-accent shrink-0" />
+                              )}
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              )}
             </div>
 
             {/* Navigation buttons */}
@@ -861,6 +1123,25 @@ export function EligibilityPage() {
         {/* ==================================================================== */}
         {step === 5 && result && (
           <div className="space-y-8 animate-fade-in-up">
+            {/* Deal-Breaker Warning Alert if Land is Untitled */}
+            {!formData.hasTitle && (
+              <div className="p-5 rounded-2xl bg-rose-50 border-2 border-rose-300 text-rose-950 flex items-start gap-3.5 shadow-sm">
+                <AlertCircle className="w-6 h-6 text-rose-600 shrink-0 mt-0.5" />
+                <div className="space-y-1">
+                  <h3 className="font-heading font-bold text-sm sm:text-base text-rose-900">
+                    {formData.language === 'fr'
+                      ? 'Critère Éliminatoire : Titre Foncier Obligatoire pour le CFC'
+                      : 'Regulatory Deal-Breaker: Titled Land (Titre Foncier) is Mandatory'}
+                  </h3>
+                  <p className="text-xs text-rose-800 leading-relaxed">
+                    {formData.language === 'fr'
+                      ? 'Le Crédit Foncier du Cameroun ne peut légalement accepter aucune demande de crédit immobilier sur terrain non titré. Tant que votre terrain n\'est pas immatriculé par un Titre Foncier en règle, votre dossier ne pourra aboutir. REI Consulting peut vous assister dans l\'audit, le bornage et la sécurisation foncière de votre parcelle.'
+                      : 'Crédit Foncier du Cameroun legally cannot approve any mortgage application without an official registered Land Title (Titre Foncier). Until your land has a valid title, CFC will not disburse funds. REI Consulting can assist you with land due diligence and title regularization.'}
+                  </p>
+                </div>
+              </div>
+            )}
+
             {/* Score Banner Card */}
             <div className="bg-white rounded-3xl p-6 sm:p-10 border border-slate-100 shadow-xl overflow-hidden relative">
               <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 pb-6 border-b border-slate-100">
@@ -1151,29 +1432,48 @@ export function EligibilityPage() {
 
                 {/* Simulator Sliders + Manual Inputs */}
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 pt-2">
-                  <div className="space-y-2">
-                    <div className="flex justify-between items-center text-xs font-bold text-slate-700">
-                      <span>{formData.language === 'fr' ? 'Durée du prêt' : 'Loan Duration'}</span>
-                      <div className="flex items-center gap-1.5">
-                        <input
-                          type="number"
-                          min={5}
-                          max={result.matchedProduct.maxTermYears}
-                          value={simTerm}
-                          onChange={(e) => setSimTerm(Math.min(result.matchedProduct.maxTermYears, Math.max(5, Number(e.target.value))))}
-                          className="w-16 px-2 py-0.5 text-right font-bold text-accent border border-slate-200 rounded-lg text-xs"
+                  {/* Loan Duration Slider & Input capped by Retirement Age 65 */}
+                  {(() => {
+                    const maxSimTerm = Math.min(result.matchedProduct.maxTermYears, Math.max(1, 65 - formData.age));
+                    const minSimTerm = Math.min(5, maxSimTerm);
+                    return (
+                      <div className="space-y-2">
+                        <div className="flex justify-between items-center text-xs font-bold text-slate-700">
+                          <div>
+                            <span>{formData.language === 'fr' ? 'Durée du prêt' : 'Loan Duration'}</span>
+                            <span className="text-[10px] text-slate-400 block font-normal">
+                              {formData.language === 'fr'
+                                ? `Plafonné à 65 ans (max ${maxSimTerm} ans pour ${formData.age} ans)`
+                                : `Capped at age 65 (max ${maxSimTerm} yrs for age ${formData.age})`}
+                            </span>
+                          </div>
+                          <div className="flex items-center gap-1.5">
+                            <input
+                              type="number"
+                              min={minSimTerm}
+                              max={maxSimTerm}
+                              value={simTerm}
+                              onChange={(e) => setSimTerm(Math.min(maxSimTerm, Math.max(minSimTerm, Number(e.target.value) || minSimTerm)))}
+                              className="w-16 px-2 py-0.5 text-right font-bold text-accent border border-slate-200 rounded-lg text-xs"
+                            />
+                            <span className="text-[11px] text-slate-500">{formData.language === 'fr' ? 'ans' : 'years'}</span>
+                          </div>
+                        </div>
+                        <Slider
+                          value={[simTerm]}
+                          min={minSimTerm}
+                          max={maxSimTerm}
+                          step={1}
+                          onValueChange={(val) => setSimTerm(val[0])}
                         />
-                        <span className="text-[11px] text-slate-500">{formData.language === 'fr' ? 'ans' : 'years'}</span>
+                        <div className="flex justify-between text-[10px] text-slate-400">
+                          <span>{minSimTerm} {formData.language === 'fr' ? 'ans min' : 'yrs min'}</span>
+                          <span className="font-semibold text-slate-700">{simTerm} {formData.language === 'fr' ? 'ans' : 'yrs'}</span>
+                          <span>{maxSimTerm} {formData.language === 'fr' ? 'ans max (retraite)' : 'yrs max (retire)'}</span>
+                        </div>
                       </div>
-                    </div>
-                    <Slider
-                      value={[simTerm]}
-                      min={5}
-                      max={result.matchedProduct.maxTermYears}
-                      step={1}
-                      onValueChange={(val) => setSimTerm(val[0])}
-                    />
-                  </div>
+                    );
+                  })()}
 
                   <div className="space-y-2">
                     <div className="flex justify-between items-center text-xs font-bold text-slate-700">

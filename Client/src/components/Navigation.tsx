@@ -137,14 +137,30 @@ export function Navigation() {
           </div>
 
           {/* Mobile Menu Button + Lang Toggle (Mobile) */}
-          <div className="flex items-center gap-4 md:hidden">
-            {/* Simple Lang Toggle for Mobile Header */}
-            <button
-              onClick={() => setLanguage(language === 'en' ? 'fr' : 'en')}
-              className="text-white/80 font-bold text-sm tracking-wide border border-white/20 px-2 py-1 rounded"
-            >
-              {language === 'en' ? 'FR' : 'EN'}
-            </button>
+          <div className="flex items-center gap-3 md:hidden">
+            {/* Direct EN / FR Toggle for Mobile Header */}
+            <div className="flex items-center bg-white/10 border border-white/20 rounded-lg p-0.5 text-xs font-bold">
+              <button
+                type="button"
+                onClick={() => setLanguage('en')}
+                className={`px-2 py-1 rounded transition-colors ${
+                  language === 'en' ? 'bg-accent text-white shadow-sm' : 'text-white/70 hover:text-white'
+                }`}
+                aria-label="Switch to English"
+              >
+                EN
+              </button>
+              <button
+                type="button"
+                onClick={() => setLanguage('fr')}
+                className={`px-2 py-1 rounded transition-colors ${
+                  language === 'fr' ? 'bg-accent text-white shadow-sm' : 'text-white/70 hover:text-white'
+                }`}
+                aria-label="Passer en Français"
+              >
+                FR
+              </button>
+            </div>
 
             <button
               onClick={() => setIsOpen(!isOpen)}

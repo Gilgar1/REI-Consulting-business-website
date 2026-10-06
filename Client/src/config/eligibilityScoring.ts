@@ -40,7 +40,7 @@ export const BAND_WORKABLE_MIN = 60;
 export type ScoreBand = 'qualified' | 'workable' | 'needs_work';
 
 export interface ScoreInput {
-  projectType: 'buy' | 'build';
+  projectType: 'buy' | 'build' | 'buy_renovate';
   propertyPurpose: 'residential' | 'rental' | 'development';
   projectCost: number; // in FCFA
   ownFunds: number; // in FCFA
@@ -49,8 +49,11 @@ export interface ScoreInput {
   age: number;
   monthlyIncome: number; // in FCFA
   employmentType: 'salaried' | 'self-employed';
-  hasTitle: boolean | null; // null if not build
+  hasTitle: boolean; // Obligatory deal breaker for CFC mortgages
   location: string;
+  propertyRegion?: string;
+  residenceType?: 'cameroon' | 'diaspora';
+  residenceCountry?: string;
 }
 
 export interface ScoreFactorBreakdown {
@@ -86,19 +89,27 @@ export interface EligibilityResult {
 // ============================================================================
 
 export function matchLoanProduct(input: ScoreInput): LoanProduct {
+  let matched: LoanProduct;
+
   if (input.propertyPurpose === 'rental') {
-    return CFC_LOAN_PRODUCTS.find((p) => p.id === 'cfc-locatif-ordinaire') || CFC_LOAN_PRODUCTS[5];
+    matched = CFC_LOAN_PRODUCTS.find((p) => p.id === 'cfc-locatif-ordinaire') || CFC_LOAN_PRODUCTS[5];
+  } else if (input.age < 35 && input.projectCost <= 50000000 && input.employmentType === 'salaried') {
+    matched = CFC_LOAN_PRODUCTS.find((p) => p.id === 'cfc-classique-jeune') || CFC_LOAN_PRODUCTS[0];
+  } else if (input.projectCost <= 30000000) {
+    matched = CFC_LOAN_PRODUCTS.find((p) => p.id === 'cfc-classique-social') || CFC_LOAN_PRODUCTS[1];
+  } else {
+    matched = CFC_LOAN_PRODUCTS.find((p) => p.id === 'cfc-classique-ordinaire') || CFC_LOAN_PRODUCTS[3];
   }
 
-  if (input.age < 35 && input.projectCost <= 50000000 && input.employmentType === 'salaried') {
-    return CFC_LOAN_PRODUCTS.find((p) => p.id === 'cfc-classique-jeune') || CFC_LOAN_PRODUCTS[0];
+  // Tiered rate for Classic Youth Loan (<300,000 FCFA => 3.75%, >=300,000 FCFA => 4.00%)
+  if (matched.id === 'cfc-classique-jeune') {
+    return {
+      ...matched,
+      annualInterestRate: input.monthlyIncome < 300000 ? 0.0375 : 0.0400,
+    };
   }
 
-  if (input.projectCost <= 30000000) {
-    return CFC_LOAN_PRODUCTS.find((p) => p.id === 'cfc-classique-social') || CFC_LOAN_PRODUCTS[1];
-  }
-
-  return CFC_LOAN_PRODUCTS.find((p) => p.id === 'cfc-classique-ordinaire') || CFC_LOAN_PRODUCTS[3];
+  return matched;
 }
 
 export function calculateEligibility(input: ScoreInput): EligibilityResult {
@@ -114,11 +125,8 @@ export function calculateEligibility(input: ScoreInput): EligibilityResult {
   let contributionPts = (contributionRatio / THRESHOLD_CONTRIBUTION_MAX_PCT) * WEIGHT_CONTRIBUTION;
   contributionPts = Math.max(0, Math.min(WEIGHT_CONTRIBUTION, contributionPts));
 
-  // 2. Titled Land Ownership Score (Max 15)
-  let titledLandPts = WEIGHT_TITLED_LAND;
-  if (input.projectType === 'build') {
-    titledLandPts = input.hasTitle ? WEIGHT_TITLED_LAND : 0;
-  }
+  // 2. Titled Land Ownership Score (Max 15) - deal-breaker across all project types!
+  const titledLandPts = input.hasTitle ? WEIGHT_TITLED_LAND : 0;
 
   // Calculate estimated monthly payment for matched product
   const defaultTerm = Math.min(
@@ -177,8 +185,9 @@ export function calculateEligibility(input: ScoreInput): EligibilityResult {
   );
 
   // Hard Gates
-  if (input.projectType === 'build' && !input.hasTitle) {
-    rawScore = Math.min(rawScore, 69);
+  // Deal breaker: Untitled land cannot receive a CFC mortgage under any circumstance!
+  if (!input.hasTitle) {
+    rawScore = Math.min(rawScore, 50); // Hard cap in 'needs_work' band
   }
   if (input.age >= 65 || remainingWorkingYears <= 3) {
     rawScore = Math.min(rawScore, 59);
@@ -198,6 +207,25 @@ export function calculateEligibility(input: ScoreInput): EligibilityResult {
 
   // Generate actionable levers / recommendations
   const levers: WhatIfLever[] = [];
+
+  // Deal-breaker lever first if land is untitled
+  if (!input.hasTitle) {
+    levers.push({
+      title: {
+        en: 'Mandatory Deal-Breaker: Titled Land (Titre Foncier)',
+        fr: 'Critère Éliminatoire : Titre Foncier Obligatoire',
+      },
+      description: {
+        en: 'Crédit Foncier du Cameroun strictly requires a legally registered Land Title (Titre Foncier) for mortgage registration. Untitled land cannot be financed. REI Consulting assists you in title search, verification, and regularization.',
+        fr: 'Le Crédit Foncier du Cameroun exige un Titre Foncier immatriculé pour toute hypothèque. Les terrains non titrés sont inéligibles. REI Consulting vous accompagne dans la vérification et la sécurisation foncière.',
+      },
+      actionText: {
+        en: 'Land Title Regularization Assistance with REI Consulting',
+        fr: 'Assistance Régularisation Foncière avec REI Consulting',
+      },
+      estimatedScoreIncrease: WEIGHT_TITLED_LAND + 25,
+    });
+  }
 
   if (contributionRatio < 0.30) {
     const targetContribution = Math.round(cost * 0.30);
@@ -219,24 +247,6 @@ export function calculateEligibility(input: ScoreInput): EligibilityResult {
         estimatedScoreIncrease: Math.round(WEIGHT_CONTRIBUTION - contributionPts),
       });
     }
-  }
-
-  if (input.projectType === 'build' && !input.hasTitle) {
-    levers.push({
-      title: {
-        en: 'Secure Land Title Before Construction',
-        fr: 'Régulariser le Titre Foncier du terrain',
-      },
-      description: {
-        en: 'CFC requires a registered Land Title (Titre Foncier). Securing or purchasing titled land unlocks 15 full points and removes the 69-point gate.',
-        fr: 'Le CFC exige un Titre Foncier valide. Obtenir un titre débloque 15 points et supprime le plafond de 69 points.',
-      },
-      actionText: {
-        en: 'Explore Title Regularization / Land Acquisition',
-        fr: 'Consulter notre service de régularisation foncière',
-      },
-      estimatedScoreIncrease: 15,
-    });
   }
 
   if (dti > THRESHOLD_DTI_OPTIMAL && existingDebt > 0) {

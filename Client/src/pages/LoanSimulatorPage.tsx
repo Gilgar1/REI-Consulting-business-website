@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { CFC_LOAN_PRODUCTS, LoanProduct } from '../config/loanProducts';
 import {
@@ -84,6 +84,28 @@ export function LoanSimulatorPage() {
   );
   const [termYears, setTermYears] = useState<number>(15);
 
+  // Borrower Age State (Max retirement age is 65 years)
+  const [clientAge, setClientAge] = useState<number>(35);
+
+  // Maximum repayment term capped by retirement at 65 (e.g. 35yo => max 30y, 40yo => max 25y, 50yo => max 15y)
+  const maxAllowedTerm = useMemo(() => {
+    const yearsUntilRetirement = Math.max(1, 65 - clientAge);
+    return Math.min(activeProduct.maxTermYears, yearsUntilRetirement);
+  }, [activeProduct.maxTermYears, clientAge]);
+
+  const minAllowedTerm = useMemo(() => {
+    return Math.min(activeProduct.minTermYears, maxAllowedTerm);
+  }, [activeProduct.minTermYears, maxAllowedTerm]);
+
+  // Automatically clamp termYears if clientAge changes or product changes
+  useEffect(() => {
+    if (termYears > maxAllowedTerm) {
+      setTermYears(maxAllowedTerm);
+    } else if (termYears < minAllowedTerm) {
+      setTermYears(minAllowedTerm);
+    }
+  }, [maxAllowedTerm, minAllowedTerm, termYears]);
+
   // Rental specific State (Default 0)
   const [expectedMonthlyRent, setExpectedMonthlyRent] = useState<number>(0);
   const [vacancyPct, setVacancyPct] = useState<number>(0.10);
@@ -95,29 +117,39 @@ export function LoanSimulatorPage() {
   const [showSchedule, setShowSchedule] = useState(false);
   const [generatingPDF, setGeneratingPDF] = useState(false);
 
+  // Youth Loan Tiered Rate state (<300,000 => 3.75%, >=300,000 => 4.00%)
+  const [youthIncomeBracket, setYouthIncomeBracket] = useState<'<300k' | '>=300k'>('<300k');
+
+  const effectiveInterestRate = useMemo(() => {
+    if (activeProduct.id === 'cfc-classique-jeune') {
+      return youthIncomeBracket === '<300k' ? 0.0375 : 0.0400;
+    }
+    return activeProduct.annualInterestRate;
+  }, [activeProduct, youthIncomeBracket]);
+
   // Forward calculation result
   const calculationResult: LoanCalculationResult = useMemo(() => {
     return calculateLoan({
       propertyPrice,
       contributionPct,
-      annualInterestRate: activeProduct.annualInterestRate,
+      annualInterestRate: effectiveInterestRate,
       termYears,
       insuranceAnnualPct: activeProduct.insuranceAnnualPct,
       expectedMonthlyRent: category === 'rental' && expectedMonthlyRent > 0 ? expectedMonthlyRent : undefined,
       vacancyRate: vacancyPct,
     });
-  }, [propertyPrice, contributionPct, activeProduct, termYears, category, expectedMonthlyRent, vacancyPct]);
+  }, [propertyPrice, contributionPct, activeProduct, effectiveInterestRate, termYears, category, expectedMonthlyRent, vacancyPct]);
 
   // Reverse calculation result
   const reverseResult = useMemo(() => {
     return calculateReverseLoan({
       monthlyBudget,
-      annualInterestRate: activeProduct.annualInterestRate,
+      annualInterestRate: effectiveInterestRate,
       termYears,
       contributionPct,
       insuranceAnnualPct: activeProduct.insuranceAnnualPct,
     });
-  }, [monthlyBudget, activeProduct, termYears, contributionPct]);
+  }, [monthlyBudget, activeProduct, effectiveInterestRate, termYears, contributionPct]);
 
   // Chart data
   const chartData = useMemo(() => {
@@ -294,7 +326,9 @@ export function LoanSimulatorPage() {
                         </span>
                         <div className="flex items-center gap-1.5 shrink-0">
                           <span className="px-2 py-0.5 rounded text-[11px] font-bold bg-amber-100 text-amber-900 whitespace-nowrap">
-                            {(prod.annualInterestRate * 100).toFixed(2)}% TTC
+                            {prod.id === 'cfc-classique-jeune'
+                              ? `${(isSelected ? effectiveInterestRate : prod.annualInterestRate) * 100}% TTC`
+                              : `${(prod.annualInterestRate * 100).toFixed(2)}% TTC`}
                           </span>
                           <span className="px-2 py-0.5 rounded text-[11px] font-semibold bg-slate-100 text-slate-700 whitespace-nowrap">
                             {Math.round(prod.minContributionPct * 100)}% min
@@ -305,6 +339,58 @@ export function LoanSimulatorPage() {
                       <p className="text-xs text-slate-500 leading-relaxed mb-3">
                         {language === 'fr' ? prod.description.fr : prod.description.en}
                       </p>
+
+                      {/* Warning if borrower is 35 or older for youth loan */}
+                      {prod.id === 'cfc-classique-jeune' && clientAge >= 35 && (
+                        <div className="mb-3 px-2.5 py-1.5 rounded-lg bg-rose-50 border border-rose-200 text-rose-800 text-[11px] flex items-center gap-1.5">
+                          <span>⚠️</span>
+                          <span>{language === 'fr' ? `Votre âge (${clientAge} ans) dépasse le plafond du Prêt Jeune (< 35 ans). Optez pour le Prêt Ordinaire ou Social.` : `Your age (${clientAge} yrs) exceeds the Youth Loan limit (< 35 yrs). Consider the Ordinary or Social Loan.`}</span>
+                        </div>
+                      )}
+
+                      {/* Youth Loan Tier Selector if Selected */}
+                      {isSelected && prod.id === 'cfc-classique-jeune' && (
+                        <div className="mb-3 p-3 rounded-xl bg-amber-100/70 border border-amber-300/80 space-y-2">
+                          <div className="flex items-center justify-between text-xs">
+                            <span className="font-bold text-amber-950">
+                              {language === 'fr' ? 'Revenu mensuel de l\'emprunteur :' : 'Borrower monthly income:'}
+                            </span>
+                            <span className="text-[11px] font-extrabold text-accent">
+                              {youthIncomeBracket === '<300k' ? '3.75% TTC' : '4.00% TTC'}
+                            </span>
+                          </div>
+                          <div className="grid grid-cols-2 gap-2 text-xs">
+                            <button
+                              type="button"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                setYouthIncomeBracket('<300k');
+                              }}
+                              className={`py-1.5 px-2 rounded-lg font-bold transition-all text-center ${
+                                youthIncomeBracket === '<300k'
+                                  ? 'bg-primary text-white shadow-sm'
+                                  : 'bg-white text-slate-700 hover:bg-amber-50 border border-amber-200'
+                              }`}
+                            >
+                              {language === 'fr' ? '< 300 000 FCFA (3,75%)' : '< 300,000 FCFA (3.75%)'}
+                            </button>
+                            <button
+                              type="button"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                setYouthIncomeBracket('>=300k');
+                              }}
+                              className={`py-1.5 px-2 rounded-lg font-bold transition-all text-center ${
+                                youthIncomeBracket === '>=300k'
+                                  ? 'bg-primary text-white shadow-sm'
+                                  : 'bg-white text-slate-700 hover:bg-amber-50 border border-amber-200'
+                              }`}
+                            >
+                              {language === 'fr' ? '≥ 300 000 FCFA (4,00%)' : '≥ 300,000 FCFA (4.00%)'}
+                            </button>
+                          </div>
+                        </div>
+                      )}
 
                       {/* Bottom row with Learn More button on bottom right */}
                       <div className="flex items-center justify-between pt-2 border-t border-slate-100 text-xs">
@@ -470,20 +556,75 @@ export function LoanSimulatorPage() {
                 </div>
               )}
 
-              {/* Term Duration Slider + Text Input */}
-              <div className="space-y-3">
+              {/* Borrower Age Question (Retirement ceiling: 65 years) */}
+              <div className="space-y-3 pt-4 border-t border-slate-100">
                 <div className="flex items-center justify-between flex-wrap gap-2">
-                  <label className="text-xs font-bold uppercase tracking-wider text-slate-700">
-                    {language === 'fr' ? 'Durée de remboursement' : 'Loan Duration'}
-                  </label>
+                  <div>
+                    <label className="text-xs font-bold uppercase tracking-wider text-slate-700 block">
+                      {language === 'fr' ? 'Âge de l\'emprunteur' : 'Borrower Age'}
+                    </label>
+                    <span className="text-[11px] text-slate-400">
+                      {language === 'fr' ? 'Plafond retraite CFC : 65 ans' : 'CFC retirement payoff ceiling: 65 yrs'}
+                    </span>
+                  </div>
                   <div className="flex items-center gap-1.5">
                     <input
                       type="number"
-                      min={activeProduct.minTermYears}
-                      max={activeProduct.maxTermYears}
+                      min={18}
+                      max={75}
+                      value={clientAge}
+                      onChange={(e) => {
+                        const val = Math.min(75, Math.max(18, Number(e.target.value) || 18));
+                        setClientAge(val);
+                      }}
+                      className="w-20 px-2 py-1 text-right font-bold text-primary border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-accent"
+                    />
+                    <span className="text-xs font-bold text-slate-500">{language === 'fr' ? 'ans' : 'years'}</span>
+                  </div>
+                </div>
+                <Slider
+                  value={[clientAge]}
+                  min={18}
+                  max={65}
+                  step={1}
+                  onValueChange={(val) => setClientAge(val[0])}
+                />
+                <div className="flex justify-between items-center text-[11px]">
+                  <span className="text-slate-400">18 {language === 'fr' ? 'ans' : 'yrs'}</span>
+                  <span className="font-semibold text-accent">
+                    {clientAge >= 65 ? (
+                      language === 'fr' ? '⚠️ Retraite atteinte (65 ans)' : '⚠️ Retirement reached (65 yrs)'
+                    ) : (
+                      language === 'fr'
+                        ? `Durée max : ${maxAllowedTerm} ans (65 - ${clientAge} ans)`
+                        : `Max payoff: ${maxAllowedTerm} yrs (65 - ${clientAge} yrs)`
+                    )}
+                  </span>
+                  <span className="text-slate-400">65 {language === 'fr' ? 'ans (retraite)' : 'yrs (retire)'}</span>
+                </div>
+              </div>
+
+              {/* Term Duration Slider + Text Input */}
+              <div className="space-y-3">
+                <div className="flex items-center justify-between flex-wrap gap-2">
+                  <div>
+                    <label className="text-xs font-bold uppercase tracking-wider text-slate-700 block">
+                      {language === 'fr' ? 'Durée de remboursement' : 'Loan Duration'}
+                    </label>
+                    <span className="text-[11px] text-slate-400">
+                      {language === 'fr'
+                        ? `Plafonné à 65 ans (max ${maxAllowedTerm} ans pour votre profil)`
+                        : `Capped at age 65 (max ${maxAllowedTerm} yrs for your age)`}
+                    </span>
+                  </div>
+                  <div className="flex items-center gap-1.5">
+                    <input
+                      type="number"
+                      min={minAllowedTerm}
+                      max={maxAllowedTerm}
                       value={termYears}
                       onChange={(e) => {
-                        const val = Math.min(activeProduct.maxTermYears, Math.max(activeProduct.minTermYears, Number(e.target.value)));
+                        const val = Math.min(maxAllowedTerm, Math.max(minAllowedTerm, Number(e.target.value) || minAllowedTerm));
                         setTermYears(val);
                       }}
                       className="w-20 px-2 py-1 text-right font-bold text-primary border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-accent"
@@ -493,14 +634,15 @@ export function LoanSimulatorPage() {
                 </div>
                 <Slider
                   value={[termYears]}
-                  min={activeProduct.minTermYears}
-                  max={activeProduct.maxTermYears}
+                  min={minAllowedTerm}
+                  max={maxAllowedTerm}
                   step={1}
                   onValueChange={(val) => setTermYears(val[0])}
                 />
                 <div className="flex justify-between text-[11px] text-slate-400">
-                  <span>{activeProduct.minTermYears} {language === 'fr' ? 'ans' : 'yrs'}</span>
-                  <span>{activeProduct.maxTermYears} {language === 'fr' ? 'ans max' : 'yrs max'}</span>
+                  <span>{minAllowedTerm} {language === 'fr' ? 'ans min' : 'yrs min'}</span>
+                  <span className="font-semibold text-slate-700">{termYears} {language === 'fr' ? 'ans' : 'yrs'}</span>
+                  <span>{maxAllowedTerm} {language === 'fr' ? 'ans max (retraite)' : 'yrs max (retire)'}</span>
                 </div>
               </div>
 
@@ -648,29 +790,80 @@ export function LoanSimulatorPage() {
                 {language === 'fr' ? 'Répartition du Coût Total du Crédit' : 'Total Credit Cost Breakdown'}
               </h3>
 
-              <div className="h-48 w-full">
-                <ResponsiveContainer width="100%" height="100%">
-                  <PieChart>
-                    <Pie
-                      data={chartData}
-                      cx="50%"
-                      cy="50%"
-                      innerRadius={50}
-                      outerRadius={75}
-                      paddingAngle={3}
-                      dataKey="value"
-                    >
-                      {chartData.map((entry, index) => (
-                        <Cell key={`cell-${index}`} fill={entry.color} />
-                      ))}
-                    </Pie>
-                    <Tooltip
-                      formatter={(val: number) => formatFCFA(val, language)}
-                      contentStyle={{ borderRadius: '8px', fontSize: '12px' }}
-                    />
-                    <Legend wrapperStyle={{ fontSize: '12px' }} />
-                  </PieChart>
-                </ResponsiveContainer>
+              <div className="grid grid-cols-1 md:grid-cols-12 gap-6 items-center">
+                {/* Visual Donut Chart */}
+                <div className="md:col-span-6 h-52 w-full">
+                  <ResponsiveContainer width="100%" height="100%">
+                    <PieChart>
+                      <Pie
+                        data={chartData}
+                        cx="50%"
+                        cy="50%"
+                        innerRadius={50}
+                        outerRadius={75}
+                        paddingAngle={3}
+                        dataKey="value"
+                      >
+                        {chartData.map((entry, index) => (
+                          <Cell key={`cell-${index}`} fill={entry.color} />
+                        ))}
+                      </Pie>
+                      <Tooltip
+                        formatter={(val: number) => formatFCFA(val, language)}
+                        contentStyle={{ borderRadius: '8px', fontSize: '12px' }}
+                      />
+                      <Legend wrapperStyle={{ fontSize: '11px' }} />
+                    </PieChart>
+                  </ResponsiveContainer>
+                </div>
+
+                {/* Total Amount Paid Summary Card Beside Chart */}
+                <div className="md:col-span-6 p-4 rounded-xl bg-slate-50 border border-slate-200/80 space-y-3">
+                  <div>
+                    <span className="text-[11px] uppercase tracking-wider font-bold text-slate-500">
+                      {language === 'fr' ? 'Total remboursé au CFC' : 'Total Amount Paid for Loan'}
+                    </span>
+                    <div className="text-xl font-heading font-extrabold text-primary mt-0.5">
+                      {formatFCFA(calculationResult.totalRepaid, language)}
+                    </div>
+                    <span className="text-[11px] text-slate-500 block">
+                      {language === 'fr'
+                        ? 'Capital emprunté + Intérêts + Assurance'
+                        : 'Principal + Total Interest + Insurance'}
+                    </span>
+                  </div>
+
+                  <div className="space-y-1.5 pt-2 border-t border-slate-200 text-xs text-slate-600">
+                    <div className="flex justify-between">
+                      <span>{language === 'fr' ? 'Capital emprunté :' : 'Principal Loan :'}</span>
+                      <strong className="text-slate-900">{formatFCFA(calculationResult.loanAmount, language)}</strong>
+                    </div>
+                    <div className="flex justify-between">
+                      <span>{language === 'fr' ? 'Intérêts totaux :' : 'Total Interest :'}</span>
+                      <strong className="text-amber-700">{formatFCFA(calculationResult.totalInterest, language)}</strong>
+                    </div>
+                    <div className="flex justify-between">
+                      <span>{language === 'fr' ? 'Assurance totale :' : 'Total Insurance :'}</span>
+                      <strong className="text-blue-700">{formatFCFA(calculationResult.totalInsurance, language)}</strong>
+                    </div>
+                  </div>
+
+                  <div className="pt-2 border-t border-slate-200/80">
+                    <div className="flex justify-between items-center text-xs">
+                      <span className="font-bold text-slate-700">
+                        {language === 'fr' ? 'Total déboursé projet :' : 'Total Outlay Altogether :'}
+                      </span>
+                      <strong className="text-accent font-extrabold text-sm">
+                        {formatFCFA(calculationResult.totalRepaid + calculationResult.cashNeededAtSigning, language)}
+                      </strong>
+                    </div>
+                    <span className="text-[10px] text-slate-400 block mt-0.5">
+                      {language === 'fr'
+                        ? '(Apport + Frais notariés & dossier + Total remboursé)'
+                        : '(Equity + Signing fees + Total loan repaid)'}
+                    </span>
+                  </div>
+                </div>
               </div>
 
               {/* Cash Needed at Signing row */}

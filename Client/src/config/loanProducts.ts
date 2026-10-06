@@ -32,10 +32,10 @@ export const CFC_LOAN_PRODUCTS: LoanProduct[] = [
       fr: 'Prêt Foncier Classique Jeune',
     },
     description: {
-      en: 'Preferred terms for young professionals under 35 with at least 2 years tenure.',
-      fr: 'Conditions préférentielles pour les jeunes de moins de 35 ans en CDI depuis au moins 2 ans.',
+      en: 'Preferred terms for young professionals under 35 with at least 2 years tenure (3.75% for income < 300,000 FCFA, 4.00% for income ≥ 300,000 FCFA).',
+      fr: 'Conditions préférentielles pour les jeunes de moins de 35 ans en CDI (3,75% pour revenu < 300 000 FCFA, 4,00% pour revenu ≥ 300 000 FCFA).',
     },
-    annualInterestRate: 0.0375, // 3.75% TTC (or 4.0% if salary > 300k)
+    annualInterestRate: 0.0375, // 3.75% (< 300,000 FCFA) or 4.00% (>= 300,000 FCFA)
     minContributionPct: 0.0, // 0% up to 10%
     maxTermYears: 30,
     minTermYears: 5,
