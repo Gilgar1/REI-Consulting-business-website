@@ -7,7 +7,6 @@ import logo from '../assets/logo.png';
 
 export function Navigation() {
   const [isOpen, setIsOpen] = useState(false);
-  const [langMenuOpen, setLangMenuOpen] = useState(false);
   const { isAuthenticated, logout } = useAuth();
   const { t, language, setLanguage } = useLanguage();
   const location = useLocation();
@@ -26,11 +25,6 @@ export function Navigation() {
   const isActive = (path: string) => {
     if (path === '/' && currentPath !== '/') return false;
     return currentPath.startsWith(path);
-  };
-
-  const handleLangChange = (lang: 'en' | 'fr') => {
-    setLanguage(lang);
-    setLangMenuOpen(false);
   };
 
   return (
@@ -62,32 +56,32 @@ export function Navigation() {
               </Link>
             ))}
 
-            {/* Language Switcher (Desktop) */}
-            <div className="relative">
+            {/* Language Switcher (Desktop) - Direct Segmented Control */}
+            <div className="flex items-center bg-slate-100 p-0.5 rounded-lg border border-slate-200 text-xs font-bold">
               <button
-                onClick={() => setLangMenuOpen(!langMenuOpen)}
-                className="flex items-center gap-1 text-slate-600 hover:text-primary font-medium text-sm focus:outline-none"
+                type="button"
+                onClick={() => setLanguage('en')}
+                className={`px-2.5 py-1 rounded transition-all duration-200 cursor-pointer ${
+                  language === 'en'
+                    ? 'bg-accent text-white shadow-sm font-bold'
+                    : 'text-slate-600 hover:text-primary hover:bg-white/60'
+                }`}
+                aria-label="Switch to English"
               >
-                {language === 'en' ? 'EN' : 'FR'}
-                <ChevronDown className={`w-3 h-3 transition-transform ${langMenuOpen ? 'rotate-180' : ''}`} />
+                EN
               </button>
-
-              {langMenuOpen && (
-                <div className="absolute top-full right-0 mt-2 w-20 bg-white rounded-lg shadow-xl border border-slate-100 py-1 overflow-hidden animate-fade-in-up">
-                  <button
-                    onClick={() => handleLangChange('en')}
-                    className={`block w-full text-left px-4 py-2 text-sm ${language === 'en' ? 'bg-primary/5 text-accent' : 'text-slate-600 hover:bg-slate-50'}`}
-                  >
-                    EN
-                  </button>
-                  <button
-                    onClick={() => handleLangChange('fr')}
-                    className={`block w-full text-left px-4 py-2 text-sm ${language === 'fr' ? 'bg-primary/5 text-accent' : 'text-slate-600 hover:bg-slate-50'}`}
-                  >
-                    FR
-                  </button>
-                </div>
-              )}
+              <button
+                type="button"
+                onClick={() => setLanguage('fr')}
+                className={`px-2.5 py-1 rounded transition-all duration-200 cursor-pointer ${
+                  language === 'fr'
+                    ? 'bg-accent text-white shadow-sm font-bold'
+                    : 'text-slate-600 hover:text-primary hover:bg-white/60'
+                }`}
+                aria-label="Passer en Français"
+              >
+                FR
+              </button>
             </div>
 
             <div className="h-6 w-px bg-slate-200 mx-2"></div>

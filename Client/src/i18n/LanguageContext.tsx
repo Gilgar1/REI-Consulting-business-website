@@ -24,12 +24,12 @@ export function LanguageProvider({ children }: { children: ReactNode }) {
         return (saved === 'fr' || saved === 'en') ? saved : 'en';
     });
 
-    const [t, setT] = useState<Translations>(language === 'fr' ? fr : en);
+    // Derive translations directly so UI updates synchronously with zero lag
+    const t: Translations = language === 'fr' ? fr : en;
 
     // Update translations and localStorage when language changes
     useEffect(() => {
         localStorage.setItem('app_language', language);
-        setT(language === 'fr' ? fr : en);
 
         // Update HTML lang attribute for SEO
         document.documentElement.lang = language;

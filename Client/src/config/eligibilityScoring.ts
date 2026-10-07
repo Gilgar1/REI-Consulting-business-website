@@ -144,7 +144,7 @@ export function calculateEligibility(input: ScoreInput): EligibilityResult {
   // 3. Debt-to-Income (DTI) Score (Max 20)
   // Monthly debt obligations + estimated new payment divided by income
   const totalMonthlyObligations = existingDebt + estimatedMonthlyPayment;
-  const dti = totalMonthlyObligations / income;
+  const dti = income > 0 ? totalMonthlyObligations / income : (totalMonthlyObligations > 0 ? 1.0 : 0);
 
   let dtiPts = 0;
   if (dti <= THRESHOLD_DTI_OPTIMAL) {
@@ -280,7 +280,7 @@ export function calculateEligibility(input: ScoreInput): EligibilityResult {
     },
     matchedProduct,
     monthlyPaymentEstimate: estimatedMonthlyPayment,
-    dtiPct: Math.round(dti * 100),
+    dtiPct: income > 0 ? Math.round(dti * 100) : (totalMonthlyObligations > 0 ? 100 : 0),
     contributionPct: Math.round(contributionRatio * 100),
     levers,
     isEligibleForConsultation: score >= BAND_QUALIFIED_MIN, // GATED ON SCORE >= 80%

@@ -37,6 +37,9 @@ export async function generateLoanSummaryPDF(
   const pageWidth = doc.internal.pageSize.getWidth();
   const pageHeight = doc.internal.pageSize.getHeight();
 
+  // Load logo as base64 for header & watermark
+  const logoBase64 = await getBase64ImageFromUrl(logoUrl);
+
   // Primary Header Bar (#0F172A)
   doc.setFillColor(15, 23, 42);
   doc.rect(0, 0, pageWidth, 28, 'F');
@@ -45,28 +48,58 @@ export async function generateLoanSummaryPDF(
   doc.setFillColor(217, 119, 6);
   doc.rect(0, 28, pageWidth, 2, 'F');
 
+  // Draw Logo in Header
+  let headerTextX = 14;
+  if (logoBase64) {
+    try {
+      doc.addImage(logoBase64, 'PNG', 14, 3.5, 21, 21);
+      headerTextX = 39;
+    } catch (e) {
+      headerTextX = 14;
+    }
+  }
+
   // Header Title
   doc.setTextColor(255, 255, 255);
   doc.setFont('helvetica', 'bold');
-  doc.setFontSize(16);
-  doc.text('REI CONSULTING', 14, 12);
+  doc.setFontSize(15);
+  doc.text('REI CONSULTING', headerTextX, 11.5);
 
-  doc.setFontSize(9);
+  doc.setFontSize(8.5);
   doc.setFont('helvetica', 'normal');
   doc.text(
     language === 'fr'
       ? 'Cabinet de Conseil Foncier & Stratégie Immobilière'
       : 'Real Estate Intelligence & Loan Advisory',
-    14,
-    18
+    headerTextX,
+    17.5
   );
 
-  doc.setFontSize(8);
-  doc.text('Tél / WhatsApp : +237 681 478 111  |  Email : reiconsultingcm@gmail.com', 14, 23);
+  doc.setFontSize(7.5);
+  doc.text('Tél / WhatsApp : +237 681 478 111  |  Email : reiconsultingcm@gmail.com', headerTextX, 23);
 
-  // Watermark (Faint text/branding)
-  doc.setTextColor(240, 243, 246);
-  doc.setFontSize(42);
+  // Watermark: Brand Logo (Transparent watermark in center of page)
+  if (logoBase64) {
+    try {
+      // @ts-ignore
+      if (typeof doc.saveGraphicsState === 'function') {
+        // @ts-ignore
+        doc.saveGraphicsState();
+        // @ts-ignore
+        doc.setGState(new doc.GState({ opacity: 0.08 }));
+        const wmSize = 80;
+        doc.addImage(logoBase64, 'PNG', (pageWidth - wmSize) / 2, (pageHeight - wmSize) / 2, wmSize, wmSize);
+        // @ts-ignore
+        doc.restoreGraphicsState();
+      }
+    } catch (e) {
+      // Fallback below
+    }
+  }
+
+  // Faint fallback text watermark
+  doc.setTextColor(242, 245, 248);
+  doc.setFontSize(40);
   doc.setFont('helvetica', 'bold');
   doc.text('REI CONSULTING', pageWidth / 2, pageHeight / 2, {
     align: 'center',
@@ -280,16 +313,30 @@ export async function generateEligibilityReportPDF(
   const pageWidth = doc.internal.pageSize.getWidth();
   const pageHeight = doc.internal.pageSize.getHeight();
 
+  // Load logo as base64 for header & watermark
+  const logoBase64 = await getBase64ImageFromUrl(logoUrl);
+
   // Header Bar (#0F172A)
   doc.setFillColor(15, 23, 42);
   doc.rect(0, 0, pageWidth, 28, 'F');
   doc.setFillColor(217, 119, 6);
   doc.rect(0, 28, pageWidth, 2, 'F');
 
+  // Draw Logo in Header
+  let headerTextX = 14;
+  if (logoBase64) {
+    try {
+      doc.addImage(logoBase64, 'PNG', 14, 3.5, 21, 21);
+      headerTextX = 39;
+    } catch (e) {
+      headerTextX = 14;
+    }
+  }
+
   doc.setTextColor(255, 255, 255);
   doc.setFont('helvetica', 'bold');
-  doc.setFontSize(16);
-  doc.text('REI CONSULTING', 14, 12);
+  doc.setFontSize(15);
+  doc.text('REI CONSULTING', headerTextX, 11.5);
 
   doc.setFontSize(8.5);
   doc.setFont('helvetica', 'normal');
@@ -297,14 +344,34 @@ export async function generateEligibilityReportPDF(
     language === 'fr'
       ? 'Cabinet de Conseil Foncier & Intelligence Immobilière  •  Yaoundé, Cameroun'
       : 'Real Estate Intelligence & Loan Advisory  •  Yaoundé, Cameroon',
-    14,
-    18
+    headerTextX,
+    17.5
   );
-  doc.text('Tél / WhatsApp : +237 681 478 111  |  reiconsultingcm@gmail.com', 14, 23);
+  doc.setFontSize(7.5);
+  doc.text('Tél / WhatsApp : +237 681 478 111  |  Email : reiconsultingcm@gmail.com', headerTextX, 23);
 
-  // Background Watermark
-  doc.setTextColor(245, 247, 250);
-  doc.setFontSize(38);
+  // Watermark: Brand Logo (Transparent watermark in center of page)
+  if (logoBase64) {
+    try {
+      // @ts-ignore
+      if (typeof doc.saveGraphicsState === 'function') {
+        // @ts-ignore
+        doc.saveGraphicsState();
+        // @ts-ignore
+        doc.setGState(new doc.GState({ opacity: 0.08 }));
+        const wmSize = 80;
+        doc.addImage(logoBase64, 'PNG', (pageWidth - wmSize) / 2, (pageHeight - wmSize) / 2, wmSize, wmSize);
+        // @ts-ignore
+        doc.restoreGraphicsState();
+      }
+    } catch (e) {
+      // Fallback below
+    }
+  }
+
+  // Background Watermark fallback text
+  doc.setTextColor(242, 245, 248);
+  doc.setFontSize(40);
   doc.setFont('helvetica', 'bold');
   doc.text('REI CONSULTING', pageWidth / 2, pageHeight / 2, {
     align: 'center',
@@ -320,11 +387,12 @@ export async function generateEligibilityReportPDF(
   doc.setTextColor(15, 23, 42);
   doc.setFontSize(12);
   doc.setFont('helvetica', 'bold');
-  const titleDisplay = applicant.title || (language === 'fr' ? 'M./Mme' : 'Mr/Mrs');
+  const validName = applicant.name?.trim() || (language === 'fr' ? 'Client REI' : 'REI Client');
+  const titleDisplay = applicant.title ? applicant.title + ' ' : '';
   doc.text(
     language === 'fr'
-      ? `Rapport d'Éligibilité Foncier — Préparé pour ${titleDisplay} ${applicant.name}`
-      : `Personal Eligibility Report — Prepared for ${titleDisplay} ${applicant.name}`,
+      ? `Rapport d'Éligibilité Foncier — Préparé pour ${titleDisplay}${validName}`
+      : `Personal Eligibility Report — Prepared for ${titleDisplay}${validName}`,
     18,
     y + 8
   );
@@ -514,5 +582,6 @@ export async function generateEligibilityReportPDF(
     { maxWidth: pageWidth - 28 }
   );
 
-  doc.save(`REI-Eligibility-Report-${applicant.name.replace(/\s+/g, '_')}.pdf`);
+  const fileSafeName = (applicant.name?.trim() || 'Client').replace(/[^a-zA-Z0-9_-]/g, '_');
+  doc.save(`REI-Eligibility-Report-${fileSafeName}.pdf`);
 }

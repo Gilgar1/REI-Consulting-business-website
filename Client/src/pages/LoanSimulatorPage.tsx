@@ -45,8 +45,12 @@ import {
   ChevronDown,
   ChevronUp,
   Info,
-  ExternalLink
+  ExternalLink,
+  MapPin,
+  ShieldCheck,
+  Search,
 } from 'lucide-react';
+import { CAMEROON_REGIONS } from '../utils/constants';
 
 export function LoanSimulatorPage() {
   const { language } = useLanguage();
@@ -76,6 +80,12 @@ export function LoanSimulatorPage() {
 
   // Learn More Product Modal State
   const [learnMoreProduct, setLearnMoreProduct] = useState<LoanProduct | null>(null);
+
+  // Property Location & Titled Land Question (CFC Requirement)
+  const [hasTitle, setHasTitle] = useState<boolean>(true);
+  const [propertyRegion, setPropertyRegion] = useState<string>('Centre');
+  const [isRegionDropdownOpen, setIsRegionDropdownOpen] = useState<boolean>(false);
+  const [regionSearchQuery, setRegionSearchQuery] = useState<string>('');
 
   // Forward Mode State (Default balance everywhere as 0 per user requirement!)
   const [propertyPrice, setPropertyPrice] = useState<number>(0);
@@ -414,6 +424,125 @@ export function LoanSimulatorPage() {
                   );
                 })}
               </div>
+            </div>
+
+            {/* Property Location & Titled Land Question (CFC Deal-Breaker) */}
+            <div className="bg-white p-6 rounded-2xl border border-slate-100 shadow-sm space-y-5">
+              <h3 className="text-sm font-bold uppercase tracking-wider text-primary flex items-center gap-2">
+                <MapPin className="w-4 h-4 text-accent" />
+                <span>{language === 'fr' ? 'Localisation & Sécurité Foncière du Bien' : 'Property Location & Land Title Status'}</span>
+              </h3>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {/* Searchable Region in Cameroon */}
+                <div className="space-y-1.5">
+                  <label className="text-xs font-bold uppercase tracking-wider text-slate-700 block">
+                    {language === 'fr' ? 'Région au Cameroun' : 'Region in Cameroon'}
+                  </label>
+                  <div className="relative">
+                    <button
+                      type="button"
+                      onClick={() => setIsRegionDropdownOpen(!isRegionDropdownOpen)}
+                      className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-semibold flex items-center justify-between text-left focus:outline-none focus:ring-2 focus:ring-accent"
+                    >
+                      <span className="text-slate-800">
+                        {CAMEROON_REGIONS.find((r) => r.id === propertyRegion)?.[language === 'fr' ? 'fr' : 'en'] || propertyRegion}
+                      </span>
+                      <ChevronDown className={`w-4 h-4 text-slate-400 transition-transform ${isRegionDropdownOpen ? 'rotate-180' : ''}`} />
+                    </button>
+
+                    {isRegionDropdownOpen && (
+                      <div className="absolute top-full left-0 right-0 mt-1.5 bg-white border border-slate-200 rounded-xl shadow-xl z-50 overflow-hidden animate-fade-in-up">
+                        <div className="p-2 border-b border-slate-100 flex items-center gap-2 bg-slate-50">
+                          <Search className="w-4 h-4 text-slate-400 shrink-0" />
+                          <input
+                            type="text"
+                            value={regionSearchQuery}
+                            onChange={(e) => setRegionSearchQuery(e.target.value)}
+                            placeholder={language === 'fr' ? 'Rechercher une région...' : 'Search a region...'}
+                            className="w-full bg-transparent text-xs text-slate-900 placeholder-slate-400 focus:outline-none"
+                            autoFocus
+                          />
+                        </div>
+                        <div className="max-h-48 overflow-y-auto divide-y divide-slate-100">
+                          {CAMEROON_REGIONS.filter((r) => {
+                            const q = regionSearchQuery.toLowerCase().trim();
+                            if (!q) return true;
+                            return r.en.toLowerCase().includes(q) || r.fr.toLowerCase().includes(q) || r.id.toLowerCase().includes(q);
+                          }).map((reg) => (
+                            <button
+                              key={reg.id}
+                              type="button"
+                              onClick={() => {
+                                setPropertyRegion(reg.id);
+                                setIsRegionDropdownOpen(false);
+                                setRegionSearchQuery('');
+                              }}
+                              className={`w-full px-3.5 py-2 text-left text-xs font-medium hover:bg-slate-50 flex items-center justify-between ${
+                                propertyRegion === reg.id ? 'bg-accent/10 text-accent font-bold' : 'text-slate-700'
+                              }`}
+                            >
+                              <span>{language === 'fr' ? reg.fr : reg.en}</span>
+                              {propertyRegion === reg.id && <CheckCircle2 className="w-3.5 h-3.5 text-accent" />}
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                </div>
+
+                {/* Titled Land Question */}
+                <div className="space-y-1.5">
+                  <label className="text-xs font-bold uppercase tracking-wider text-slate-700 block">
+                    {language === 'fr' ? 'Le bien a-t-il un Titre Foncier ?' : 'Is the property covered by a Land Title?'}
+                  </label>
+                  <div className="grid grid-cols-2 gap-2">
+                    <button
+                      type="button"
+                      onClick={() => setHasTitle(true)}
+                      className={`py-2.5 px-3 rounded-xl font-bold text-xs border transition-all flex items-center justify-center gap-1.5 cursor-pointer ${
+                        hasTitle
+                          ? 'bg-emerald-600 text-white border-emerald-600 shadow-sm'
+                          : 'bg-slate-50 text-slate-700 border-slate-200 hover:bg-slate-100'
+                      }`}
+                    >
+                      <CheckCircle2 className="w-3.5 h-3.5 shrink-0" />
+                      <span>{language === 'fr' ? 'Oui (Titré)' : 'Yes (Titled)'}</span>
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setHasTitle(false)}
+                      className={`py-2.5 px-3 rounded-xl font-bold text-xs border transition-all flex items-center justify-center gap-1.5 cursor-pointer ${
+                        !hasTitle
+                          ? 'bg-rose-600 text-white border-rose-600 shadow-sm'
+                          : 'bg-slate-50 text-slate-700 border-slate-200 hover:bg-slate-100'
+                      }`}
+                    >
+                      <AlertCircle className="w-3.5 h-3.5 shrink-0" />
+                      <span>{language === 'fr' ? 'Non (Non titré)' : 'No (Untitled)'}</span>
+                    </button>
+                  </div>
+                </div>
+              </div>
+
+              {!hasTitle && (
+                <div className="p-3.5 rounded-xl bg-rose-50 border border-rose-200 text-xs text-rose-900 space-y-1 animate-fade-in">
+                  <div className="font-bold flex items-center gap-1.5 text-rose-700">
+                    <ShieldCheck className="w-4 h-4 shrink-0" />
+                    <span>
+                      {language === 'fr'
+                        ? 'Condition bloquante CFC : Titre Foncier obligatoire'
+                        : 'CFC Deal-Breaker: Registered Land Title (Titre Foncier) is Mandatory'}
+                    </span>
+                  </div>
+                  <p className="leading-relaxed text-[11.5px] text-rose-800">
+                    {language === 'fr'
+                      ? 'Le Crédit Foncier du Cameroun (CFC) exige impérativement un Titre Foncier pour toute hypothèque. Les terrains non titrés ne peuvent pas obtenir de financement. REI Consulting vous accompagne dans la vérification et la régularisation de votre titre.'
+                      : 'Crédit Foncier du Cameroun strictly requires a legally registered Land Title (Titre Foncier) to approve mortgage loans. Untitled land cannot be financed. REI Consulting can assist you with title search, verification, and regularization.'}
+                  </p>
+                </div>
+              )}
             </div>
 
             {/* 2. Numerical Inputs (Sliders + Linked Exact Number Boxes) */}
@@ -951,16 +1080,16 @@ export function LoanSimulatorPage() {
                   <table className="w-full text-xs text-left">
                     <thead>
                       <tr className="border-b text-slate-400 uppercase font-semibold">
-                        <th className="pb-2">Année</th>
-                        <th className="pb-2">Capital remboursé</th>
-                        <th className="pb-2">Intérêts</th>
-                        <th className="pb-2 text-right">Capital restant</th>
+                        <th className="pb-2">{language === 'fr' ? 'Année' : 'Year'}</th>
+                        <th className="pb-2">{language === 'fr' ? 'Capital remboursé' : 'Principal Repaid'}</th>
+                        <th className="pb-2">{language === 'fr' ? 'Intérêts payés' : 'Interest Paid'}</th>
+                        <th className="pb-2 text-right">{language === 'fr' ? 'Capital restant dû' : 'Remaining Balance'}</th>
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-slate-100">
                       {calculationResult.amortizationSchedule.map((row) => (
                         <tr key={row.year} className="hover:bg-slate-50/60">
-                          <td className="py-2 font-bold text-primary">An {row.year}</td>
+                          <td className="py-2 font-bold text-primary">{language === 'fr' ? `An ${row.year}` : `Yr ${row.year}`}</td>
                           <td className="py-2 text-slate-700">{formatFCFA(row.principalPaid, language)}</td>
                           <td className="py-2 text-slate-600">{formatFCFA(row.interestPaid, language)}</td>
                           <td className="py-2 text-right font-medium text-slate-900">{formatFCFA(row.remainingBalance, language)}</td>

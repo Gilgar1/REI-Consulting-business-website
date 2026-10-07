@@ -124,6 +124,10 @@ export function EligibilityPage() {
   const [isCountryDropdownOpen, setIsCountryDropdownOpen] = useState(false);
   const [countrySearchQuery, setCountrySearchQuery] = useState('');
 
+  // Region dropdown state for Cameroon property location selection
+  const [isRegionDropdownOpen, setIsRegionDropdownOpen] = useState(false);
+  const [regionSearchQuery, setRegionSearchQuery] = useState('');
+
   // Form State with sensible Cameroon real estate defaults
   const [formData, setFormData] = useState<FormData>({
     language: (language as 'en' | 'fr') || 'en',
@@ -137,9 +141,9 @@ export function EligibilityPage() {
     totalSavings: 4000000,
     age: 34,
     employmentType: 'salaried',
-    monthlyIncome: 850000,
-    monthlyDebt: 50000,
-    totalDebt: 1500000,
+    monthlyIncome: 0, // Starts at 0 per user requirement (no minimum floor)
+    monthlyDebt: 0,
+    totalDebt: 0,
     residenceType: 'cameroon',
     residenceCountry: 'Cameroon',
     location: 'In Cameroon (Resident)',
@@ -149,6 +153,11 @@ export function EligibilityPage() {
     email: '',
     consent: true,
   });
+
+  // Sync formData.language whenever global language changes
+  useEffect(() => {
+    setFormData((prev) => ({ ...prev, language: (language as 'en' | 'fr') || 'en' }));
+  }, [language]);
 
   const [result, setResult] = useState<EligibilityResult | null>(null);
 
@@ -166,13 +175,18 @@ export function EligibilityPage() {
   };
 
   const handleNextStep = () => {
-    // Validation for Step 3: Monthly Income is required (cannot be empty or 0), but no minimum amount floor
+    // Validation for Step 3: Monthly Income begins at 0 with no minimum floor
     if (step === 3) {
-      if (!formData.monthlyIncome || formData.monthlyIncome <= 0) {
+      if (
+        formData.monthlyIncome === undefined ||
+        formData.monthlyIncome === null ||
+        formData.monthlyIncome < 0 ||
+        Number.isNaN(formData.monthlyIncome)
+      ) {
         alert(
           formData.language === 'fr'
-            ? 'Veuillez renseigner votre revenu net mensuel (champ obligatoire).'
-            : 'Please enter your monthly net income (required field).'
+            ? 'Veuillez renseigner votre revenu net mensuel (commence à 0 FCFA).'
+            : 'Please enter your monthly net income (begins at 0 FCFA).'
         );
         return;
       }
@@ -532,23 +546,64 @@ export function EligibilityPage() {
               </div>
             </div>
 
-            {/* Property Location: Region in Cameroon */}
+            {/* Property Location: Region in Cameroon (Searchable) */}
             <div className="space-y-2">
               <label className="text-xs font-bold uppercase tracking-wider text-slate-700 flex items-center gap-1.5">
                 <MapPin className="w-3.5 h-3.5 text-accent" />
                 <span>{formData.language === 'fr' ? '3. Localisation du bien (Région au Cameroun)' : '3. Property Location (Region in Cameroon)'}</span>
               </label>
-              <select
-                value={formData.propertyRegion}
-                onChange={(e) => updateField('propertyRegion', e.target.value)}
-                className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-medium focus:outline-none focus:ring-2 focus:ring-accent"
-              >
-                {CAMEROON_REGIONS.map((reg) => (
-                  <option key={reg.id} value={reg.id}>
-                    {formData.language === 'fr' ? reg.fr : reg.en}
-                  </option>
-                ))}
-              </select>
+
+              <div className="relative">
+                <button
+                  type="button"
+                  onClick={() => setIsRegionDropdownOpen(!isRegionDropdownOpen)}
+                  className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-semibold flex items-center justify-between text-left focus:outline-none focus:ring-2 focus:ring-accent"
+                >
+                  <span className="text-slate-800">
+                    {CAMEROON_REGIONS.find((r) => r.id === formData.propertyRegion)?.[formData.language === 'fr' ? 'fr' : 'en'] || formData.propertyRegion}
+                  </span>
+                  <ChevronDown className={`w-4 h-4 text-slate-400 transition-transform ${isRegionDropdownOpen ? 'rotate-180' : ''}`} />
+                </button>
+
+                {isRegionDropdownOpen && (
+                  <div className="absolute top-full left-0 right-0 mt-1.5 bg-white border border-slate-200 rounded-xl shadow-xl z-50 overflow-hidden animate-fade-in-up">
+                    <div className="p-2 border-b border-slate-100 flex items-center gap-2 bg-slate-50">
+                      <Search className="w-4 h-4 text-slate-400 shrink-0" />
+                      <input
+                        type="text"
+                        value={regionSearchQuery}
+                        onChange={(e) => setRegionSearchQuery(e.target.value)}
+                        placeholder={formData.language === 'fr' ? 'Rechercher une région au Cameroun...' : 'Search a Cameroon region...'}
+                        className="w-full bg-transparent text-xs text-slate-900 placeholder-slate-400 focus:outline-none"
+                        autoFocus
+                      />
+                    </div>
+                    <div className="max-h-48 overflow-y-auto divide-y divide-slate-100">
+                      {CAMEROON_REGIONS.filter((r) => {
+                        const q = regionSearchQuery.toLowerCase().trim();
+                        if (!q) return true;
+                        return r.en.toLowerCase().includes(q) || r.fr.toLowerCase().includes(q) || r.id.toLowerCase().includes(q);
+                      }).map((reg) => (
+                        <button
+                          key={reg.id}
+                          type="button"
+                          onClick={() => {
+                            updateField('propertyRegion', reg.id);
+                            setIsRegionDropdownOpen(false);
+                            setRegionSearchQuery('');
+                          }}
+                          className={`w-full px-3.5 py-2 text-left text-xs font-medium hover:bg-slate-50 flex items-center justify-between ${
+                            formData.propertyRegion === reg.id ? 'bg-accent/10 text-accent font-bold' : 'text-slate-700'
+                          }`}
+                        >
+                          <span>{formData.language === 'fr' ? reg.fr : reg.en}</span>
+                          {formData.propertyRegion === reg.id && <CheckCircle2 className="w-3.5 h-3.5 text-accent" />}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </div>
             </div>
 
             {/* Titled Land Gate (Mandatory Deal-Breaker for ALL projects) */}
@@ -829,15 +884,15 @@ export function EligibilityPage() {
                 type="number"
                 min="0"
                 step="10000"
-                value={formData.monthlyIncome || ''}
-                onChange={(e) => updateField('monthlyIncome', Math.max(0, Number(e.target.value)))}
-                placeholder={formData.language === 'fr' ? 'Ex: 150000' : 'e.g. 150000'}
+                value={formData.monthlyIncome === 0 ? '0' : formData.monthlyIncome || ''}
+                onChange={(e) => updateField('monthlyIncome', Math.max(0, Number(e.target.value) || 0))}
+                placeholder="0"
                 required
               />
               <span className="text-[11px] text-slate-400">
                 {formData.language === 'fr'
-                  ? 'Champ obligatoire — aucun montant minimum requis'
-                  : 'Required field — no minimum income floor'}
+                  ? 'Commence à 0 FCFA — aucun montant minimum requis'
+                  : 'Begins at 0 FCFA — no minimum floor required'}
               </span>
             </div>
 
